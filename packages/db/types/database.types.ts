@@ -131,6 +131,7 @@ export interface Database {
       leads: {
         Row: {
           id: string;
+          title: string | null;
           company_id: string | null;
           contact_id: string | null;
           source: string | null;
@@ -143,6 +144,7 @@ export interface Database {
         };
         Insert: {
           id?: string;
+          title?: string | null;
           company_id?: string | null;
           contact_id?: string | null;
           source?: string | null;
@@ -155,6 +157,7 @@ export interface Database {
         };
         Update: {
           id?: string;
+          title?: string | null;
           company_id?: string | null;
           contact_id?: string | null;
           source?: string | null;
@@ -191,6 +194,7 @@ export interface Database {
       deals: {
         Row: {
           id: string;
+          title: string;
           company_id: string;
           primary_contact_id: string | null;
           stage: "prospect" | "proposal" | "negotiation" | "won" | "lost";
@@ -203,6 +207,7 @@ export interface Database {
         };
         Insert: {
           id?: string;
+          title?: string;
           company_id: string;
           primary_contact_id?: string | null;
           stage?: "prospect" | "proposal" | "negotiation" | "won" | "lost";
@@ -215,6 +220,7 @@ export interface Database {
         };
         Update: {
           id?: string;
+          title?: string;
           company_id?: string;
           primary_contact_id?: string | null;
           stage?: "prospect" | "proposal" | "negotiation" | "won" | "lost";
