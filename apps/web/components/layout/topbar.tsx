@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { LogOut, User } from "lucide-react";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export function Topbar({ fullName, role }: { fullName: string; role: string }) {
   const router = useRouter();
@@ -17,7 +18,9 @@ export function Topbar({ fullName, role }: { fullName: string; role: string }) {
   return (
     <header className="flex h-14 items-center justify-between border-b bg-card px-6">
       <div />
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
+        <ThemeToggle />
+        <div className="h-4 w-px bg-border" />
         <div className="flex items-center gap-2 text-sm">
           <User className="h-4 w-4 text-muted-foreground" />
           <span className="font-medium">{fullName}</span>
