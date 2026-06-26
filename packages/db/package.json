@@ -1,0 +1,17 @@
+{
+  "name": "@crm/db",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./types/database.types": "./types/database.types.ts"
+  },
+  "scripts": {
+    "generate-types": "supabase gen types typescript --local > types/database.types.ts"
+  },
+  "devDependencies": {
+    "supabase": "^2.23.4"
+  }
+}
