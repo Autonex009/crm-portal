@@ -2,9 +2,10 @@
   "name": "crm-portal",
   "version": "0.0.1",
   "private": true,
+  "packageManager": "pnpm@10.12.4",
   "engines": {
     "node": ">=22",
-    "pnpm": ">=11"
+    "pnpm": ">=10"
   },
   "scripts": {
     "build": "turbo run build",
