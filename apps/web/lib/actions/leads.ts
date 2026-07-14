@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/auth";
 import { z } from "zod";
 
 type ActionResult<T = void> =
@@ -55,7 +56,7 @@ function leadFields(formData: FormData) {
 
 export async function createLead(formData: FormData): Promise<ActionResult<{ id: string }>> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return { success: false, error: "Unauthorized" };
 
   const parsed = LeadInput.safeParse(leadFields(formData));
@@ -74,7 +75,7 @@ export async function createLead(formData: FormData): Promise<ActionResult<{ id:
 
 export async function updateLead(id: string, formData: FormData): Promise<ActionResult> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return { success: false, error: "Unauthorized" };
 
   const parsed = LeadInput.safeParse(leadFields(formData));
@@ -92,7 +93,7 @@ export async function updateLeadStatus(
   status: "new" | "contacted" | "qualified" | "lost"
 ): Promise<ActionResult> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return { success: false, error: "Unauthorized" };
 
   const { error } = await supabase.from("leads").update({ status }).eq("id", id);
@@ -104,7 +105,7 @@ export async function updateLeadStatus(
 
 export async function deleteLead(id: string): Promise<ActionResult> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return { success: false, error: "Unauthorized" };
 
   const { error } = await supabase

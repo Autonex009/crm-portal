@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/auth";
 
 export type ImportRow = Record<string, string | number | null>;
 
@@ -92,7 +93,7 @@ interface DealRecord {
 
 export async function importLeads(rows: ImportRow[]): Promise<ImportResult> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return { success: false, error: "Unauthorized" };
   if (!Array.isArray(rows) || rows.length === 0) {
     return { success: false, error: "No rows found in the file" };
@@ -184,7 +185,7 @@ export async function importLeads(rows: ImportRow[]): Promise<ImportResult> {
 
 export async function importDeals(rows: ImportRow[]): Promise<ImportResult> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return { success: false, error: "Unauthorized" };
   if (!Array.isArray(rows) || rows.length === 0) {
     return { success: false, error: "No rows found in the file" };

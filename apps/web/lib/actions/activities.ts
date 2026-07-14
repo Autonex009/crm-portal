@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/auth";
 import { z } from "zod";
 
 type ActionResult<T = void> =
@@ -17,7 +18,7 @@ const ActivityInput = z.object({
 
 export async function createActivity(formData: FormData): Promise<ActionResult<{ id: string }>> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return { success: false, error: "Unauthorized" };
 
   const parsed = ActivityInput.safeParse({
@@ -44,7 +45,7 @@ export async function createActivity(formData: FormData): Promise<ActionResult<{
 
 export async function deleteActivity(id: string, entityType: string, entityId: string): Promise<ActionResult> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return { success: false, error: "Unauthorized" };
 
   const { error } = await supabase.from("activities").delete().eq("id", id).eq("author_id", user.id);

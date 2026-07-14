@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Handshake, GitBranch } from "lucide-react";
 import { DealsKanban } from "./_components/deals-kanban";
@@ -10,7 +11,7 @@ export const metadata = { title: "Deals — CRM Portal" };
 
 export default async function DealsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) redirect("/auth/login");
 
   const [{ data: deals }, { data: companies }, { data: contacts }] = await Promise.all([

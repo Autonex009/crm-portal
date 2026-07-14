@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/auth";
 import { z } from "zod";
 
 type ActionResult<T = void> =
@@ -19,7 +20,7 @@ const ContactInput = z.object({
 
 export async function createContact(formData: FormData): Promise<ActionResult<{ id: string }>> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return { success: false, error: "Unauthorized" };
 
   const parsed = ContactInput.safeParse({
@@ -46,7 +47,7 @@ export async function createContact(formData: FormData): Promise<ActionResult<{ 
 
 export async function updateContact(id: string, formData: FormData): Promise<ActionResult> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return { success: false, error: "Unauthorized" };
 
   const parsed = ContactInput.safeParse({
@@ -68,7 +69,7 @@ export async function updateContact(id: string, formData: FormData): Promise<Act
 
 export async function deleteContact(id: string): Promise<ActionResult> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return { success: false, error: "Unauthorized" };
 
   const { error } = await supabase

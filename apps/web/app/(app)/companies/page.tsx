@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Building2 } from "lucide-react";
 import { CompaniesTable } from "./_components/companies-table";
@@ -7,7 +8,7 @@ export const metadata = { title: "Companies — CRM Portal" };
 
 export default async function CompaniesPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) redirect("/auth/login");
 
   const { data: companies } = await supabase

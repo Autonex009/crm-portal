@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Building2, Handshake, FileText, TrendingUp, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
@@ -8,7 +9,7 @@ export const metadata = { title: "Dashboard — CRM Portal" };
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) redirect("/auth/login");
 
   const [

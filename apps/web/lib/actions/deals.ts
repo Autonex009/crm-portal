@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/auth";
 import { z } from "zod";
 
 type ActionResult<T = void> =
@@ -48,7 +49,7 @@ function dealFields(formData: FormData) {
 
 export async function createDeal(formData: FormData): Promise<ActionResult<{ id: string }>> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return { success: false, error: "Unauthorized" };
 
   const parsed = DealInput.safeParse(dealFields(formData));
@@ -67,7 +68,7 @@ export async function createDeal(formData: FormData): Promise<ActionResult<{ id:
 
 export async function updateDeal(id: string, formData: FormData): Promise<ActionResult> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return { success: false, error: "Unauthorized" };
 
   const parsed = DealInput.safeParse(dealFields(formData));
@@ -86,7 +87,7 @@ export async function updateDealStage(
   stage: "prospect" | "proposal" | "negotiation" | "won" | "lost"
 ): Promise<ActionResult> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return { success: false, error: "Unauthorized" };
 
   const { error } = await supabase.from("deals").update({ stage }).eq("id", id);
@@ -98,7 +99,7 @@ export async function updateDealStage(
 
 export async function deleteDeal(id: string): Promise<ActionResult> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return { success: false, error: "Unauthorized" };
 
   const { error } = await supabase

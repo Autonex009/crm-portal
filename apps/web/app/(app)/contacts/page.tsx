@@ -7,12 +7,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { EmptyState } from "@/components/ui/empty-state";
 import { ContactSheet } from "./_components/contact-sheet";
 import { ContactsClient } from "./_components/contacts-client";
+import { getAuthUser } from "@/lib/auth";
 
 export const metadata = { title: "Contacts — CRM Portal" };
 
 export default async function ContactsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) redirect("/auth/login");
 
   const [{ data: contacts }, { data: companies }] = await Promise.all([

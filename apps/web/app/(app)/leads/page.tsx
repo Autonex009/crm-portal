@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { TrendingUp, GitBranch } from "lucide-react";
 import { LeadsClient } from "./_components/leads-client";
@@ -10,7 +11,7 @@ export const metadata = { title: "Leads — CRM Portal" };
 
 export default async function LeadsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) redirect("/auth/login");
 
   const [{ data: leads }, { data: companies }, { data: contacts }] = await Promise.all([
