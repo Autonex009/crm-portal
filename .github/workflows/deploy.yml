@@ -1,0 +1,49 @@
+name: Deploy to Railway
+
+# Builds the web app, then deploys to the active Railway service on every
+# push to main. Also runnable manually from the Actions tab.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Cancel an in-progress deploy if a newer commit lands on main.
+concurrency:
+  group: railway-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build & deploy @crm/web
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Gate: fail fast before deploying if the web app doesn't compile/build.
+      - name: Typecheck & build
+        run: pnpm turbo run typecheck build --filter=@crm/web
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      # Uploads the current commit's code to Railway and builds/deploys it.
+      # --ci streams the build logs and exits with the build's status.
+      - name: Deploy to Railway
+        run: railway up --service crm-portal --ci
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
