@@ -51,20 +51,41 @@ const DEAL_STAGES = ["prospect", "proposal", "negotiation", "won", "lost"] as co
 type LeadStatus = (typeof LEAD_STATUSES)[number];
 type DealStage = (typeof DEAL_STAGES)[number];
 
+function toProbability(val: string | null): number | null {
+  const n = toNumber(val);
+  if (n === null) return null;
+  return Math.min(100, Math.max(0, Math.round(n)));
+}
+
 interface LeadRecord {
   title: string;
+  contact_name: string | null;
+  job_title: string | null;
   company_id: string | null;
+  email: string | null;
+  phone: string | null;
+  linkedin_url: string | null;
+  industry: string | null;
+  location: string | null;
+  product_interest: string | null;
   source: string | null;
   status: LeadStatus;
   value_estimate: number | null;
+  next_follow_up_date: string | null;
+  notes: string | null;
   assigned_to: string;
 }
 
 interface DealRecord {
   title: string;
+  job_title: string | null;
   company_id: string;
   stage: DealStage;
   amount: number;
+  product_use_case: string | null;
+  probability: number | null;
+  next_action: string | null;
+  notes: string | null;
   expected_close_date: string | null;
   owner_id: string;
 }
@@ -88,30 +109,65 @@ export async function importLeads(rows: ImportRow[]): Promise<ImportResult> {
   const errors: string[] = [];
   const records: LeadRecord[] = [];
 
-  rows.forEach((row, i) => {
-    const title = pick(row, ["title", "lead", "lead title", "name", "lead name"]);
-    if (!title) {
-      errors.push(`Row ${i + 2}: missing title — skipped`);
-      return;
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const name = pick(row, ["name", "lead name", "contact name", "full name", "title", "lead", "lead title"]);
+    if (!name) {
+      errors.push(`Row ${i + 2}: missing name — skipped`);
+      continue;
     }
     const companyName = pick(row, ["company", "company name", "account", "organisation", "organization"]);
+
+    // Preserve the Company field: link an existing company or create it on the fly.
+    let companyId: string | null = null;
+    if (companyName) {
+      companyId = companyByName.get(companyName.toLowerCase()) ?? null;
+      if (!companyId) {
+        const { data: created } = await supabase
+          .from("companies")
+          .insert({ name: companyName, owner_id: user.id })
+          .select("id")
+          .single();
+        if (created) {
+          companyId = created.id;
+          companyByName.set(companyName.toLowerCase(), created.id);
+        }
+      }
+    }
+
     const statusRaw = (pick(row, ["status", "lead status"]) ?? "new").toLowerCase();
     const status: LeadStatus = (LEAD_STATUSES as readonly string[]).includes(statusRaw)
       ? (statusRaw as LeadStatus)
       : "new";
 
     records.push({
-      title,
-      company_id: companyName ? companyByName.get(companyName.toLowerCase()) ?? null : null,
+      title: name,
+      contact_name: name,
+      job_title: pick(row, ["job title", "title", "role", "position", "designation"]),
+      company_id: companyId,
+      email: pick(row, ["email", "email address", "e-mail"]),
+      phone: pick(row, ["phone", "phone number", "mobile", "contact number", "tel"]),
+      linkedin_url: pick(row, ["linkedin", "linkedin profile", "linkedin url", "linkedin link"]),
+      industry: pick(row, ["industry", "sector", "sector/industry", "sector industry", "vertical"]),
+      location: pick(row, ["location", "city", "region", "country", "geo"]),
+      product_interest: pick(row, [
+        "product use cases / interest", "product use cases", "product interest",
+        "use case", "use cases", "interest", "product",
+      ]),
       source: pick(row, ["source", "lead source", "channel"]),
       status,
-      value_estimate: toNumber(pick(row, ["value", "value estimate", "estimated value", "amount", "estimate"])),
+      value_estimate: toNumber(pick(row, ["value", "value estimate", "estimated value", "estimate"])),
+      next_follow_up_date: toIsoDate(pick(row, [
+        "next follow-up date", "next follow up date", "next followup date",
+        "follow-up date", "follow up date", "next follow-up", "next follow up",
+      ])),
+      notes: pick(row, ["notes", "note", "comments", "remarks"]),
       assigned_to: user.id,
     });
-  });
+  }
 
   if (records.length === 0) {
-    return { success: false, error: "No valid rows to import. Ensure a 'Title' column exists." };
+    return { success: false, error: "No valid rows to import. Ensure a 'Name' column exists." };
   }
 
   const { error, count } = await supabase
@@ -147,9 +203,9 @@ export async function importDeals(rows: ImportRow[]): Promise<ImportResult> {
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
-    const title = pick(row, ["title", "deal", "deal title", "name", "deal name", "opportunity"]);
+    const title = pick(row, ["name", "deal name", "title", "deal", "deal title", "opportunity"]);
     if (!title) {
-      errors.push(`Row ${i + 2}: missing title — skipped`);
+      errors.push(`Row ${i + 2}: missing name — skipped`);
       continue;
     }
 
@@ -182,11 +238,22 @@ export async function importDeals(rows: ImportRow[]): Promise<ImportResult> {
 
     records.push({
       title,
+      job_title: pick(row, ["job title", "role", "position", "designation", "contact title"]),
       company_id: companyId,
       stage,
       amount: toNumber(pick(row, ["amount", "value", "deal value", "deal amount", "price"])) ?? 0,
+      product_use_case: pick(row, [
+        "product / use case", "product/use case", "product use case",
+        "product", "use case", "use cases",
+      ]),
+      probability: toProbability(pick(row, ["probability", "probability (%)", "probability %", "win probability", "confidence"])),
+      next_action: pick(row, ["next action", "next step", "next steps", "action"]),
+      notes: pick(row, ["notes", "note", "comments", "remarks"]),
       expected_close_date: toIsoDate(
-        pick(row, ["expected close date", "close date", "expected close", "closing date", "date"])
+        pick(row, [
+          "expected closing date", "expected close date", "closing date",
+          "close date", "expected close", "date",
+        ])
       ),
       owner_id: user.id,
     });

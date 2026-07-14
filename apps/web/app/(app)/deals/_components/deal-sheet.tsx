@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createDeal, updateDeal } from "@/lib/actions/deals";
@@ -18,10 +19,15 @@ type DealStage = "prospect" | "proposal" | "negotiation" | "won" | "lost";
 interface Deal {
   id: string;
   title: string;
+  job_title: string | null;
   company_id: string;
   primary_contact_id: string | null;
   stage: DealStage;
   amount: number;
+  product_use_case: string | null;
+  probability: number | null;
+  next_action: string | null;
+  notes: string | null;
   expected_close_date: string | null;
 }
 
@@ -90,13 +96,23 @@ export function DealSheet({ deal, companies, contacts, defaultStage = "prospect"
         <form onSubmit={handleSubmit} id="deal-form">
           <SheetBody className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="title">Deal Title *</Label>
+              <Label htmlFor="title">Name *</Label>
               <Input
                 id="title"
                 name="title"
                 defaultValue={deal?.title}
                 placeholder="e.g. Acme Corp — Enterprise Plan"
                 required
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="job_title">Job Title</Label>
+              <Input
+                id="job_title"
+                name="job_title"
+                defaultValue={deal?.job_title ?? ""}
+                placeholder="e.g. VP Engineering"
               />
             </div>
 
@@ -155,13 +171,59 @@ export function DealSheet({ deal, companies, contacts, defaultStage = "prospect"
               />
             </div>
 
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="expected_close_date">Expected Closing Date</Label>
+                <Input
+                  id="expected_close_date"
+                  name="expected_close_date"
+                  type="date"
+                  defaultValue={deal?.expected_close_date ?? ""}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="probability">Probability (%)</Label>
+                <Input
+                  id="probability"
+                  name="probability"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="1"
+                  defaultValue={deal?.probability ?? ""}
+                  placeholder="0–100"
+                />
+              </div>
+            </div>
+
             <div className="space-y-1.5">
-              <Label htmlFor="expected_close_date">Expected Close Date</Label>
+              <Label htmlFor="product_use_case">Product / Use Case</Label>
               <Input
-                id="expected_close_date"
-                name="expected_close_date"
-                type="date"
-                defaultValue={deal?.expected_close_date ?? ""}
+                id="product_use_case"
+                name="product_use_case"
+                defaultValue={deal?.product_use_case ?? ""}
+                placeholder="e.g. Workflow automation"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="next_action">Next Action</Label>
+              <Input
+                id="next_action"
+                name="next_action"
+                defaultValue={deal?.next_action ?? ""}
+                placeholder="e.g. Send revised proposal"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="notes">Notes</Label>
+              <Textarea
+                id="notes"
+                name="notes"
+                defaultValue={deal?.notes ?? ""}
+                placeholder="Additional context…"
+                rows={3}
               />
             </div>
           </SheetBody>

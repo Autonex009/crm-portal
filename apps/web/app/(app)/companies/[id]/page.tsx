@@ -39,7 +39,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
       .order("first_name"),
     supabase
       .from("deals")
-      .select("id, title, stage, amount, expected_close_date")
+      .select("id, title, stage, amount, probability, product_use_case, next_action, expected_close_date")
       .eq("company_id", id)
       .is("deleted_at", null)
       .order("created_at", { ascending: false }),
@@ -195,15 +195,20 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
                       <Link key={d.id} href={`/deals/${d.id}`} className="flex items-center gap-3 p-4 hover:bg-muted/30 transition-colors">
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-sm">{d.title}</p>
-                          {d.expected_close_date && (
-                            <p className="text-xs text-muted-foreground">
-                              Close {formatDate(d.expected_close_date)}
-                            </p>
+                          {d.product_use_case && (
+                            <p className="text-xs text-muted-foreground truncate">{d.product_use_case}</p>
                           )}
+                          <div className="flex flex-wrap gap-x-3 text-xs text-muted-foreground">
+                            {d.expected_close_date && <span>Close {formatDate(d.expected_close_date)}</span>}
+                            {d.next_action && <span>Next: {d.next_action}</span>}
+                          </div>
                         </div>
                         <div className="text-right">
                           <p className="font-semibold text-sm">{formatCurrency(d.amount)}</p>
                           <DealStageBadge stage={d.stage as Parameters<typeof DealStageBadge>[0]["stage"]} />
+                          {d.probability != null && (
+                            <p className="text-xs text-muted-foreground mt-0.5">{d.probability}% likely</p>
+                          )}
                         </div>
                       </Link>
                     ))}

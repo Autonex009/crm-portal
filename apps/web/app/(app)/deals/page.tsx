@@ -16,7 +16,7 @@ export default async function DealsPage() {
   const [{ data: deals }, { data: companies }, { data: contacts }] = await Promise.all([
     supabase
       .from("deals")
-      .select("id, title, stage, amount, expected_close_date, companies(name), contacts:primary_contact_id(first_name, last_name)")
+      .select("id, title, stage, amount, probability, product_use_case, next_action, expected_close_date, companies(name), contacts:primary_contact_id(first_name, last_name)")
       .is("deleted_at", null)
       .order("created_at", { ascending: false }),
     supabase
@@ -51,6 +51,9 @@ export default async function DealsPage() {
     title: d.title ?? "Untitled Deal",
     stage: d.stage as DealStage,
     amount: d.amount,
+    probability: d.probability,
+    product_use_case: d.product_use_case,
+    next_action: d.next_action,
     expected_close_date: d.expected_close_date,
     company_name: Array.isArray(d.companies)
       ? (d.companies[0] as { name: string } | undefined)?.name ?? null

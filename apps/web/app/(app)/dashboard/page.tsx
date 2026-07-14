@@ -19,7 +19,7 @@ export default async function DashboardPage() {
   ] = await Promise.all([
     supabase.from("companies").select("*", { count: "exact", head: true }).is("deleted_at", null),
     supabase.from("leads").select("*", { count: "exact", head: true }).is("deleted_at", null).neq("status", "lost"),
-    supabase.from("deals").select("id, title, stage, amount, companies(name)").is("deleted_at", null).order("updated_at", { ascending: false }),
+    supabase.from("deals").select("id, title, stage, amount, probability, next_action, companies(name)").is("deleted_at", null).order("updated_at", { ascending: false }),
     supabase
       .from("activities")
       .select("id, type, body, occurred_at, entity_type, entity_id, profiles:author_id(full_name)")
@@ -30,6 +30,20 @@ export default async function DashboardPage() {
   const activeDeals = deals?.filter((d) => !["won", "lost"].includes(d.stage)) ?? [];
   const totalPipelineValue = activeDeals.reduce((s, d) => s + d.amount, 0);
   const wonDealsThisMonth = deals?.filter((d) => d.stage === "won") ?? [];
+
+  // Probability-weighted pipeline: use the deal's own probability when set,
+  // otherwise fall back to a sensible default for its stage.
+  const STAGE_DEFAULT_PROBABILITY: Record<string, number> = {
+    prospect: 10,
+    proposal: 40,
+    negotiation: 70,
+    won: 100,
+    lost: 0,
+  };
+  const weightedPipelineValue = activeDeals.reduce((s, d) => {
+    const p = d.probability ?? STAGE_DEFAULT_PROBABILITY[d.stage] ?? 0;
+    return s + d.amount * (p / 100);
+  }, 0);
 
   const stats = [
     {
@@ -119,7 +133,14 @@ export default async function DashboardPage() {
       <div className="grid gap-6 lg:grid-cols-5">
         <div className="lg:col-span-3 rounded-xl border bg-card">
           <div className="flex items-center justify-between p-5 border-b">
-            <h2 className="font-semibold">Active Pipeline</h2>
+            <div>
+              <h2 className="font-semibold">Active Pipeline</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {formatCurrency(totalPipelineValue)} total
+                <span className="mx-1.5">·</span>
+                <span className="font-medium text-foreground">{formatCurrency(weightedPipelineValue)}</span> weighted
+              </p>
+            </div>
             <Link href="/deals" className="text-sm text-primary hover:underline">View all →</Link>
           </div>
           {activeDeals.length === 0 ? (
@@ -146,7 +167,10 @@ export default async function DashboardPage() {
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-semibold">{formatCurrency(deal.amount)}</p>
-                      <p className="text-xs text-muted-foreground capitalize">{deal.stage}</p>
+                      <p className="text-xs text-muted-foreground capitalize">
+                        {deal.stage}
+                        {deal.probability != null && <span> · {deal.probability}%</span>}
+                      </p>
                     </div>
                   </Link>
                 );

@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Building2, User, Calendar, IndianRupee } from "lucide-react";
+import { ArrowLeft, Building2, User, Calendar, IndianRupee, Percent, Package, Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DealStageBadge } from "@/components/ui/badge";
 import { ActivityTimeline } from "@/components/crm/activity-timeline";
@@ -132,12 +132,55 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
                     <Calendar className="h-4 w-4 text-orange-600" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Expected Close</p>
+                    <p className="text-xs text-muted-foreground">Expected Closing</p>
                     <p className="font-semibold">{formatDate(deal.expected_close_date)}</p>
                   </div>
                 </div>
               )}
+
+              {deal.probability != null && (
+                <div className="flex items-center gap-3">
+                  <div className="rounded-lg bg-teal-100 p-2">
+                    <Percent className="h-4 w-4 text-teal-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Probability</p>
+                    <p className="font-semibold">{deal.probability}%</p>
+                  </div>
+                </div>
+              )}
+
+              {deal.product_use_case && (
+                <div className="flex items-center gap-3">
+                  <div className="rounded-lg bg-indigo-100 p-2">
+                    <Package className="h-4 w-4 text-indigo-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Product / Use Case</p>
+                    <p className="font-semibold">{deal.product_use_case}</p>
+                  </div>
+                </div>
+              )}
+
+              {deal.next_action && (
+                <div className="flex items-center gap-3">
+                  <div className="rounded-lg bg-rose-100 p-2">
+                    <Flag className="h-4 w-4 text-rose-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Next Action</p>
+                    <p className="font-semibold">{deal.next_action}</p>
+                  </div>
+                </div>
+              )}
             </div>
+
+            {deal.notes && (
+              <div className="mt-4 pt-4 border-t">
+                <p className="text-xs text-muted-foreground mb-1">Notes</p>
+                <p className="text-sm whitespace-pre-wrap">{deal.notes}</p>
+              </div>
+            )}
           </div>
 
           <div className="rounded-xl border bg-card p-6">

@@ -13,17 +13,38 @@ type Entity = "leads" | "deals";
 
 const TEMPLATES: Record<Entity, { headers: string[]; sample: (string | number)[][] }> = {
   leads: {
-    headers: ["Title", "Company", "Source", "Status", "Value"],
+    headers: [
+      "Name", "Job Title", "Company", "Email", "Phone Number", "LinkedIn Profile",
+      "Sector/Industry", "Location", "Product Use Cases / Interest", "Status",
+      "Next Follow-up Date", "Notes",
+    ],
     sample: [
-      ["Enterprise SaaS Opportunity", "Acme Corp", "Website", "new", 500000],
-      ["Annual Renewal", "Globex", "Referral", "contacted", 250000],
+      [
+        "Priya Sharma", "VP Engineering", "Acme Corp", "priya@acme.com", "+91 98765 43210",
+        "https://linkedin.com/in/priyasharma", "SaaS", "Bengaluru",
+        "Workflow automation", "new", "2026-08-01", "Met at SaaSBOOMi",
+      ],
+      [
+        "Rahul Verma", "Head of Sales", "Globex", "rahul@globex.com", "+91 91234 56780",
+        "https://linkedin.com/in/rahulverma", "Manufacturing", "Pune",
+        "Analytics dashboard", "contacted", "2026-07-28", "Referred by partner",
+      ],
     ],
   },
   deals: {
-    headers: ["Title", "Company", "Stage", "Amount", "Expected Close Date"],
+    headers: [
+      "Name", "Job Title", "Company", "Stage", "Amount", "Expected Closing Date",
+      "Product / Use Case", "Probability (%)", "Next Action", "Notes",
+    ],
     sample: [
-      ["Acme — Enterprise Plan", "Acme Corp", "proposal", 1200000, "2026-09-30"],
-      ["Globex Upsell", "Globex", "negotiation", 750000, "2026-08-15"],
+      [
+        "Acme — Enterprise Plan", "VP Engineering", "Acme Corp", "proposal", 1200000,
+        "2026-09-30", "Workflow automation", 60, "Send revised proposal", "Budget approved",
+      ],
+      [
+        "Globex Upsell", "Head of Sales", "Globex", "negotiation", 750000,
+        "2026-08-15", "Analytics dashboard", 80, "Schedule contract call", "Awaiting legal review",
+      ],
     ],
   },
 };
@@ -115,8 +136,8 @@ export function ImportDialog({ entity }: { entity: Entity }) {
               <p className="font-medium">Need the right format?</p>
               <p className="text-muted-foreground text-xs">
                 {entity === "deals"
-                  ? "Columns: Title, Company (required), Stage, Amount, Expected Close Date."
-                  : "Columns: Title (required), Company, Source, Status, Value."}
+                  ? "Columns: Name (required), Job Title, Company (required), Stage, Amount, Expected Closing Date, Product / Use Case, Probability (%), Next Action, Notes."
+                  : "Columns: Name (required), Job Title, Company, Email, Phone Number, LinkedIn Profile, Sector/Industry, Location, Product Use Cases / Interest, Status, Next Follow-up Date, Notes."}
               </p>
             </div>
             <Button variant="ghost" size="sm" onClick={downloadTemplate} type="button">

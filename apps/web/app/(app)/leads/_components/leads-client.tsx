@@ -15,21 +15,31 @@ import { LeadSheet } from "./lead-sheet";
 import { deleteLead, updateLeadStatus } from "@/lib/actions/leads";
 import { toast } from "@/components/ui/use-toast";
 import { TrendingUp, MoreHorizontal, Pencil, Trash2, Search } from "lucide-react";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 
 type LeadStatus = "new" | "contacted" | "qualified" | "lost";
 
 interface Lead {
   id: string;
   title: string | null;
+  contact_name: string | null;
+  job_title: string | null;
   company_id: string | null;
   contact_id: string | null;
+  email: string | null;
+  phone: string | null;
+  linkedin_url: string | null;
+  industry: string | null;
+  location: string | null;
+  product_interest: string | null;
   source: string | null;
   status: LeadStatus;
   value_estimate: number | null;
+  next_follow_up_date: string | null;
+  notes: string | null;
   created_at: string;
   company_name: string | null;
-  contact_name: string | null;
+  linked_contact_name: string | null;
 }
 
 interface Company { id: string; name: string }
@@ -59,8 +69,13 @@ export function LeadsClient({
   const filtered = leads.filter((l) => {
     const q = search.toLowerCase();
     const matchesSearch =
-      l.title?.toLowerCase().includes(q) ||
+      (l.contact_name ?? l.title)?.toLowerCase().includes(q) ||
+      l.job_title?.toLowerCase().includes(q) ||
       l.company_name?.toLowerCase().includes(q) ||
+      l.email?.toLowerCase().includes(q) ||
+      l.industry?.toLowerCase().includes(q) ||
+      l.location?.toLowerCase().includes(q) ||
+      l.product_interest?.toLowerCase().includes(q) ||
       l.source?.toLowerCase().includes(q);
     const matchesStatus = statusFilter === "all" || l.status === statusFilter;
     return matchesSearch && matchesStatus;
@@ -124,12 +139,12 @@ export function LeadsClient({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Lead</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>Name</TableHead>
                 <TableHead>Company</TableHead>
-                <TableHead>Source</TableHead>
-                <TableHead>Value</TableHead>
-                <TableHead>Created</TableHead>
+                <TableHead>Contact</TableHead>
+                <TableHead>Interest</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Next Follow-up</TableHead>
                 <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
@@ -137,25 +152,44 @@ export function LeadsClient({
               {filtered.map((lead) => (
                 <TableRow key={lead.id}>
                   <TableCell>
-                    <p className="font-medium text-sm">{lead.title ?? "Untitled Lead"}</p>
-                    {lead.contact_name && (
-                      <p className="text-xs text-muted-foreground">{lead.contact_name}</p>
+                    <p className="font-medium text-sm">{lead.contact_name ?? lead.title ?? "Untitled Lead"}</p>
+                    {lead.job_title && (
+                      <p className="text-xs text-muted-foreground">{lead.job_title}</p>
                     )}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    <p>{lead.company_name ?? "—"}</p>
+                    {lead.location && (
+                      <p className="text-xs text-muted-foreground/70">{lead.location}</p>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {lead.email ? (
+                      <a href={`mailto:${lead.email}`} className="hover:text-foreground hover:underline">{lead.email}</a>
+                    ) : lead.phone ? (
+                      <span>{lead.phone}</span>
+                    ) : (
+                      "—"
+                    )}
+                    {lead.linkedin_url && (
+                      <a
+                        href={lead.linkedin_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block text-xs text-primary hover:underline"
+                      >
+                        LinkedIn
+                      </a>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground max-w-40 truncate">
+                    {lead.product_interest ?? "—"}
                   </TableCell>
                   <TableCell>
                     <LeadStatusBadge status={lead.status} />
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {lead.company_name ?? "—"}
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {lead.source ?? "—"}
-                  </TableCell>
-                  <TableCell className="text-sm font-medium">
-                    {lead.value_estimate != null ? formatCurrency(lead.value_estimate) : "—"}
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {formatDate(lead.created_at)}
+                    {lead.next_follow_up_date ? formatDate(lead.next_follow_up_date) : "—"}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>

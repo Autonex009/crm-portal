@@ -58,12 +58,23 @@ export type CreateContact = z.infer<typeof CreateContactSchema>;
 
 export const LeadSchema = z.object({
   id: z.string().uuid(),
+  title: z.string().nullable(),
+  contact_name: z.string().nullable(),
+  job_title: z.string().nullable(),
   company_id: z.string().uuid().nullable(),
   contact_id: z.string().uuid().nullable(),
+  email: z.string().nullable(),
+  phone: z.string().nullable(),
+  linkedin_url: z.string().nullable(),
+  industry: z.string().nullable(),
+  location: z.string().nullable(),
+  product_interest: z.string().nullable(),
   source: z.string().nullable(),
   status: LeadStatusSchema,
   assigned_to: z.string().uuid().nullable(),
   value_estimate: z.number().nonnegative().nullable(),
+  next_follow_up_date: z.string().date().nullable(),
+  notes: z.string().nullable(),
   deleted_at: z.string().datetime().nullable(),
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
@@ -71,21 +82,43 @@ export const LeadSchema = z.object({
 export type Lead = z.infer<typeof LeadSchema>;
 
 export const CreateLeadSchema = LeadSchema.pick({
+  title: true,
+  contact_name: true,
+  job_title: true,
   company_id: true,
   contact_id: true,
+  email: true,
+  phone: true,
+  linkedin_url: true,
+  industry: true,
+  location: true,
+  product_interest: true,
   source: true,
   status: true,
   assigned_to: true,
   value_estimate: true,
-}).partial({ company_id: true, contact_id: true, source: true, assigned_to: true, value_estimate: true });
+  next_follow_up_date: true,
+  notes: true,
+}).partial({
+  title: true, contact_name: true, job_title: true, company_id: true, contact_id: true,
+  email: true, phone: true, linkedin_url: true, industry: true, location: true,
+  product_interest: true, source: true, assigned_to: true, value_estimate: true,
+  next_follow_up_date: true, notes: true,
+});
 export type CreateLead = z.infer<typeof CreateLeadSchema>;
 
 export const DealSchema = z.object({
   id: z.string().uuid(),
+  title: z.string(),
+  job_title: z.string().nullable(),
   company_id: z.string().uuid(),
   primary_contact_id: z.string().uuid().nullable(),
   stage: DealStageSchema,
   amount: z.number().nonnegative(),
+  product_use_case: z.string().nullable(),
+  probability: z.number().int().min(0).max(100).nullable(),
+  next_action: z.string().nullable(),
+  notes: z.string().nullable(),
   owner_id: z.string().uuid(),
   expected_close_date: z.string().date().nullable(),
   deleted_at: z.string().datetime().nullable(),
@@ -95,12 +128,21 @@ export const DealSchema = z.object({
 export type Deal = z.infer<typeof DealSchema>;
 
 export const CreateDealSchema = DealSchema.pick({
+  title: true,
+  job_title: true,
   company_id: true,
   primary_contact_id: true,
   stage: true,
   amount: true,
+  product_use_case: true,
+  probability: true,
+  next_action: true,
+  notes: true,
   expected_close_date: true,
-}).partial({ primary_contact_id: true, expected_close_date: true });
+}).partial({
+  job_title: true, primary_contact_id: true, product_use_case: true,
+  probability: true, next_action: true, notes: true, expected_close_date: true,
+});
 export type CreateDeal = z.infer<typeof CreateDealSchema>;
 
 export const ActivitySchema = z.object({

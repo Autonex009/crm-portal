@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createLead, updateLead } from "@/lib/actions/leads";
@@ -16,11 +17,21 @@ import { Plus } from "lucide-react";
 interface Lead {
   id: string;
   title: string | null;
+  contact_name: string | null;
+  job_title: string | null;
   company_id: string | null;
   contact_id: string | null;
+  email: string | null;
+  phone: string | null;
+  linkedin_url: string | null;
+  industry: string | null;
+  location: string | null;
+  product_interest: string | null;
   source: string | null;
   status: "new" | "contacted" | "qualified" | "lost";
   value_estimate: number | null;
+  next_follow_up_date: string | null;
+  notes: string | null;
 }
 
 interface Company { id: string; name: string }
@@ -48,6 +59,8 @@ export function LeadSheet({ lead, companies, contacts, trigger }: LeadSheetProps
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     formData.set("status", status);
+    // The record's title mirrors the person's Name.
+    formData.set("title", (formData.get("contact_name") as string) ?? "");
     if (companyId) formData.set("company_id", companyId);
     if (contactId) formData.set("contact_id", contactId);
     if (source) formData.set("source", source);
@@ -87,13 +100,23 @@ export function LeadSheet({ lead, companies, contacts, trigger }: LeadSheetProps
         <form onSubmit={handleSubmit} id="lead-form">
           <SheetBody className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="title">Lead Title *</Label>
+              <Label htmlFor="contact_name">Name *</Label>
               <Input
-                id="title"
-                name="title"
-                defaultValue={lead?.title ?? ""}
-                placeholder="e.g. Enterprise SaaS Opportunity"
+                id="contact_name"
+                name="contact_name"
+                defaultValue={lead?.contact_name ?? lead?.title ?? ""}
+                placeholder="e.g. Priya Sharma"
                 required
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="job_title">Job Title</Label>
+              <Input
+                id="job_title"
+                name="job_title"
+                defaultValue={lead?.job_title ?? ""}
+                placeholder="e.g. VP Engineering"
               />
             </div>
 
@@ -148,16 +171,101 @@ export function LeadSheet({ lead, companies, contacts, trigger }: LeadSheetProps
               </Select>
             </div>
 
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  defaultValue={lead?.email ?? ""}
+                  placeholder="name@company.com"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  defaultValue={lead?.phone ?? ""}
+                  placeholder="+91 98765 43210"
+                />
+              </div>
+            </div>
+
             <div className="space-y-1.5">
-              <Label htmlFor="value_estimate">Estimated Value (₹)</Label>
+              <Label htmlFor="linkedin_url">LinkedIn Profile</Label>
               <Input
-                id="value_estimate"
-                name="value_estimate"
-                type="number"
-                min="0"
-                step="100"
-                defaultValue={lead?.value_estimate ?? ""}
-                placeholder="0"
+                id="linkedin_url"
+                name="linkedin_url"
+                defaultValue={lead?.linkedin_url ?? ""}
+                placeholder="https://linkedin.com/in/…"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="industry">Sector / Industry</Label>
+                <Input
+                  id="industry"
+                  name="industry"
+                  defaultValue={lead?.industry ?? ""}
+                  placeholder="e.g. SaaS"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="location">Location</Label>
+                <Input
+                  id="location"
+                  name="location"
+                  defaultValue={lead?.location ?? ""}
+                  placeholder="e.g. Bengaluru"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="product_interest">Product Use Cases / Interest</Label>
+              <Input
+                id="product_interest"
+                name="product_interest"
+                defaultValue={lead?.product_interest ?? ""}
+                placeholder="e.g. Workflow automation"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="value_estimate">Estimated Value (₹)</Label>
+                <Input
+                  id="value_estimate"
+                  name="value_estimate"
+                  type="number"
+                  min="0"
+                  step="100"
+                  defaultValue={lead?.value_estimate ?? ""}
+                  placeholder="0"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="next_follow_up_date">Next Follow-up Date</Label>
+                <Input
+                  id="next_follow_up_date"
+                  name="next_follow_up_date"
+                  type="date"
+                  defaultValue={lead?.next_follow_up_date ?? ""}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="notes">Notes</Label>
+              <Textarea
+                id="notes"
+                name="notes"
+                defaultValue={lead?.notes ?? ""}
+                placeholder="Additional context…"
+                rows={3}
               />
             </div>
           </SheetBody>

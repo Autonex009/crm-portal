@@ -132,12 +132,22 @@ export interface Database {
         Row: {
           id: string;
           title: string | null;
+          contact_name: string | null;
+          job_title: string | null;
           company_id: string | null;
           contact_id: string | null;
+          email: string | null;
+          phone: string | null;
+          linkedin_url: string | null;
+          industry: string | null;
+          location: string | null;
+          product_interest: string | null;
           source: string | null;
           status: "new" | "contacted" | "qualified" | "lost";
           assigned_to: string | null;
           value_estimate: number | null;
+          next_follow_up_date: string | null;
+          notes: string | null;
           deleted_at: string | null;
           created_at: string;
           updated_at: string;
@@ -145,12 +155,22 @@ export interface Database {
         Insert: {
           id?: string;
           title?: string | null;
+          contact_name?: string | null;
+          job_title?: string | null;
           company_id?: string | null;
           contact_id?: string | null;
+          email?: string | null;
+          phone?: string | null;
+          linkedin_url?: string | null;
+          industry?: string | null;
+          location?: string | null;
+          product_interest?: string | null;
           source?: string | null;
           status?: "new" | "contacted" | "qualified" | "lost";
           assigned_to?: string | null;
           value_estimate?: number | null;
+          next_follow_up_date?: string | null;
+          notes?: string | null;
           deleted_at?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -158,12 +178,22 @@ export interface Database {
         Update: {
           id?: string;
           title?: string | null;
+          contact_name?: string | null;
+          job_title?: string | null;
           company_id?: string | null;
           contact_id?: string | null;
+          email?: string | null;
+          phone?: string | null;
+          linkedin_url?: string | null;
+          industry?: string | null;
+          location?: string | null;
+          product_interest?: string | null;
           source?: string | null;
           status?: "new" | "contacted" | "qualified" | "lost";
           assigned_to?: string | null;
           value_estimate?: number | null;
+          next_follow_up_date?: string | null;
+          notes?: string | null;
           deleted_at?: string | null;
           updated_at?: string;
         };
@@ -195,10 +225,15 @@ export interface Database {
         Row: {
           id: string;
           title: string;
+          job_title: string | null;
           company_id: string;
           primary_contact_id: string | null;
           stage: "prospect" | "proposal" | "negotiation" | "won" | "lost";
           amount: number;
+          product_use_case: string | null;
+          probability: number | null;
+          next_action: string | null;
+          notes: string | null;
           owner_id: string;
           expected_close_date: string | null;
           deleted_at: string | null;
@@ -208,10 +243,15 @@ export interface Database {
         Insert: {
           id?: string;
           title?: string;
+          job_title?: string | null;
           company_id: string;
           primary_contact_id?: string | null;
           stage?: "prospect" | "proposal" | "negotiation" | "won" | "lost";
           amount?: number;
+          product_use_case?: string | null;
+          probability?: number | null;
+          next_action?: string | null;
+          notes?: string | null;
           owner_id: string;
           expected_close_date?: string | null;
           deleted_at?: string | null;
@@ -221,10 +261,15 @@ export interface Database {
         Update: {
           id?: string;
           title?: string;
+          job_title?: string | null;
           company_id?: string;
           primary_contact_id?: string | null;
           stage?: "prospect" | "proposal" | "negotiation" | "won" | "lost";
           amount?: number;
+          product_use_case?: string | null;
+          probability?: number | null;
+          next_action?: string | null;
+          notes?: string | null;
           owner_id?: string;
           expected_close_date?: string | null;
           deleted_at?: string | null;

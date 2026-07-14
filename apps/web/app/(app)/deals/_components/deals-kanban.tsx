@@ -32,6 +32,9 @@ export interface DealCard {
   title: string;
   stage: DealStage;
   amount: number;
+  probability: number | null;
+  product_use_case: string | null;
+  next_action: string | null;
   expected_close_date: string | null;
   company_name: string | null;
   contact_name: string | null;
@@ -140,19 +143,30 @@ function SortableDealCard({ deal, overlay }: { deal: DealCard; overlay?: boolean
       </Link>
 
       {deal.company_name && (
-        <p className="text-xs text-muted-foreground mb-2">{deal.company_name}</p>
+        <p className="text-xs text-muted-foreground mb-1">{deal.company_name}</p>
+      )}
+
+      {deal.product_use_case && (
+        <p className="text-xs text-muted-foreground/80 mb-2 truncate">{deal.product_use_case}</p>
       )}
 
       <div className="flex items-center justify-between">
         <span className="text-sm font-semibold text-foreground">
           {formatCurrency(deal.amount)}
         </span>
-        {deal.expected_close_date && (
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Calendar className="h-3 w-3" />
-            {formatDate(deal.expected_close_date)}
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {deal.probability != null && (
+            <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+              {deal.probability}%
+            </span>
+          )}
+          {deal.expected_close_date && (
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Calendar className="h-3 w-3" />
+              {formatDate(deal.expected_close_date)}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

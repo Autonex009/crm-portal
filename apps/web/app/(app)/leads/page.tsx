@@ -16,7 +16,7 @@ export default async function LeadsPage() {
   const [{ data: leads }, { data: companies }, { data: contacts }] = await Promise.all([
     supabase
       .from("leads")
-      .select("id, title, company_id, contact_id, source, status, value_estimate, created_at, companies(name), contacts(first_name, last_name)")
+      .select("id, title, contact_name, job_title, company_id, contact_id, email, phone, linkedin_url, industry, location, product_interest, source, status, value_estimate, next_follow_up_date, notes, created_at, companies(name), contacts(first_name, last_name)")
       .is("deleted_at", null)
       .order("created_at", { ascending: false }),
     supabase
@@ -39,17 +39,20 @@ export default async function LeadsPage() {
     {} as Record<LeadStatus, number>
   );
 
-  const mapped = (leads ?? []).map((l) => ({
-    ...l,
-    title: l.title ?? null,
-    company_name: Array.isArray(l.companies)
-      ? (l.companies[0] as { name: string } | undefined)?.name ?? null
-      : (l.companies as { name: string } | null)?.name ?? null,
-    contact_name: (() => {
-      const c = Array.isArray(l.contacts) ? l.contacts[0] : l.contacts;
-      return c ? `${(c as { first_name: string; last_name: string }).first_name} ${(c as { first_name: string; last_name: string }).last_name}` : null;
-    })(),
-  }));
+  const mapped = (leads ?? []).map((l) => {
+    const { companies, contacts, ...rest } = l;
+    const linkedContact = Array.isArray(contacts) ? contacts[0] : contacts;
+    return {
+      ...rest,
+      title: l.title ?? null,
+      company_name: Array.isArray(companies)
+        ? (companies[0] as { name: string } | undefined)?.name ?? null
+        : (companies as { name: string } | null)?.name ?? null,
+      linked_contact_name: linkedContact
+        ? `${(linkedContact as { first_name: string; last_name: string }).first_name} ${(linkedContact as { first_name: string; last_name: string }).last_name}`
+        : null,
+    };
+  });
 
   return (
     <div className="space-y-6">
