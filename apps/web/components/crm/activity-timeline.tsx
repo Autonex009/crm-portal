@@ -1,7 +1,7 @@
 import { formatDistanceToNow } from "date-fns";
 import { MessageSquare, Phone, Mail, Calendar, Zap } from "lucide-react";
-import { Avatar, AvatarFallback, initials } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { cn, initials } from "@/lib/utils";
 
 type ActivityType = "note" | "call" | "email" | "meeting" | "system";
 

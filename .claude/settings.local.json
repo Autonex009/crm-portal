@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(pnpm --version)",
+      "Bash(npm install *)",
+      "Bash(pnpm install *)",
+      "Bash(pnpm *)",
+      "Bash(npx tsc *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(psql --version)",
+      "Bash(npx supabase *)",
+      "Bash(node *)",
+      "Bash(PGPASSWORD='crm-portal@123' psql *)",
+      "Bash(python -c \"import sys,json;d=json.load\\(sys.stdin\\);print\\(d.get\\('version','?'\\)\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('version:', d['version']\\); print\\('exports:', list\\(d.get\\('exports', {}\\).keys\\(\\)\\)[:10]\\)\")",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('exports', {}\\), indent=2\\)\\)\")"
+    ]
+  }
+}

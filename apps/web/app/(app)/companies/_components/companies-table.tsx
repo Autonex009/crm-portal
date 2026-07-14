@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, initials } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -16,7 +16,7 @@ import { CompanySheet } from "./company-sheet";
 import { deleteCompany } from "@/lib/actions/companies";
 import { toast } from "@/components/ui/use-toast";
 import { Building2, MoreHorizontal, Pencil, Trash2, ExternalLink, Search } from "lucide-react";
-import { formatDate } from "@/lib/utils";
+import { formatDate, initials } from "@/lib/utils";
 
 interface Company {
   id: string;

@@ -5,12 +5,12 @@ import { Building2, Globe, Briefcase, ArrowLeft, Plus } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, initials } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ActivityTimeline } from "@/components/crm/activity-timeline";
 import { AddActivityForm } from "@/components/crm/add-activity-form";
 import { CompanySheet } from "../_components/company-sheet";
 import { ContactSheet } from "../../contacts/_components/contact-sheet";
-import { formatDate, formatCurrency } from "@/lib/utils";
+import { formatDate, formatCurrency, initials } from "@/lib/utils";
 import { DealStageBadge } from "@/components/ui/badge";
 
 export const metadata = { title: "Company Details — CRM Portal" };

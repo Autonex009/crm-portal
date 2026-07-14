@@ -1,7 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, GitBranch } from "lucide-react";
 import { LeadsClient } from "./_components/leads-client";
+import { MermaidDiagram } from "@/components/ui/mermaid";
+import { ImportDialog } from "@/components/crm/import-dialog";
+import { leadLifecycleChart, type LeadStatus } from "@/lib/pipeline-charts";
 
 export const metadata = { title: "Leads — CRM Portal" };
 
@@ -28,6 +31,14 @@ export default async function LeadsPage() {
       .order("first_name"),
   ]);
 
+  const lifecycleCounts = (["new", "contacted", "qualified", "lost"] as const).reduce(
+    (acc, status) => {
+      acc[status] = (leads ?? []).filter((l) => l.status === status).length;
+      return acc;
+    },
+    {} as Record<LeadStatus, number>
+  );
+
   const mapped = (leads ?? []).map((l) => ({
     ...l,
     title: l.title ?? null,
@@ -42,15 +53,30 @@ export default async function LeadsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-          <TrendingUp className="h-6 w-6 text-muted-foreground" />
-          Leads
-        </h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          {leads?.length ?? 0} total leads
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+            <TrendingUp className="h-6 w-6 text-muted-foreground" />
+            Leads
+          </h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            {leads?.length ?? 0} total leads
+          </p>
+        </div>
+        <ImportDialog entity="leads" />
       </div>
+
+      {(leads?.length ?? 0) > 0 && (
+        <details className="group rounded-xl border bg-card" open>
+          <summary className="flex cursor-pointer items-center gap-2 p-4 font-semibold text-sm select-none">
+            <GitBranch className="h-4 w-4 text-muted-foreground" />
+            Lead Lifecycle
+          </summary>
+          <div className="border-t p-4">
+            <MermaidDiagram chart={leadLifecycleChart(lifecycleCounts)} />
+          </div>
+        </details>
+      )}
 
       <LeadsClient leads={mapped} companies={companies ?? []} contacts={contacts ?? []} />
     </div>

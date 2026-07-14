@@ -21,7 +21,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { DealSheet } from "./deal-sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, DollarSign, Plus, GripVertical } from "lucide-react";
+import { Calendar, Plus, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/components/ui/use-toast";
 

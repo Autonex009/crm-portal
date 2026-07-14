@@ -149,7 +149,7 @@ export function LeadSheet({ lead, companies, contacts, trigger }: LeadSheetProps
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="value_estimate">Estimated Value ($)</Label>
+              <Label htmlFor="value_estimate">Estimated Value (₹)</Label>
               <Input
                 id="value_estimate"
                 name="value_estimate"

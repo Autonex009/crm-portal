@@ -143,7 +143,7 @@ export function DealSheet({ deal, companies, contacts, defaultStage = "prospect"
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="amount">Deal Value ($) *</Label>
+              <Label htmlFor="amount">Deal Value (₹) *</Label>
               <Input
                 id="amount"
                 name="amount"

@@ -1,12 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Building2, User, Calendar, DollarSign } from "lucide-react";
+import { ArrowLeft, Building2, User, Calendar, IndianRupee } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DealStageBadge } from "@/components/ui/badge";
 import { ActivityTimeline } from "@/components/crm/activity-timeline";
 import { AddActivityForm } from "@/components/crm/add-activity-form";
 import { DealSheet } from "../_components/deal-sheet";
+import { MermaidDiagram } from "@/components/ui/mermaid";
+import { dealStageFlowChart, type DealStage as ChartDealStage } from "@/lib/pipeline-charts";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const metadata = { title: "Deal Details — CRM Portal" };
@@ -88,7 +90,7 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
             <div className="grid grid-cols-2 gap-4 pt-4 border-t">
               <div className="flex items-center gap-3">
                 <div className="rounded-lg bg-green-100 p-2">
-                  <DollarSign className="h-4 w-4 text-green-600" />
+                  <IndianRupee className="h-4 w-4 text-green-600" />
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Deal Value</p>
@@ -136,6 +138,11 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
                 </div>
               )}
             </div>
+          </div>
+
+          <div className="rounded-xl border bg-card p-6">
+            <h3 className="font-semibold mb-4">Deal Journey</h3>
+            <MermaidDiagram chart={dealStageFlowChart(deal.stage as ChartDealStage)} />
           </div>
 
           <div className="rounded-xl border bg-card p-6">
