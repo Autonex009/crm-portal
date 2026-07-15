@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "exports": {
-    "./tsconfig/*": "./tsconfig/*.json",
+    "./tsconfig/*": "./tsconfig/*",
     "./eslint": "./eslint/index.js",
     "./tailwind": "./tailwind/preset.ts"
   }
