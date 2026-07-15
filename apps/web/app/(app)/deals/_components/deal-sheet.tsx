@@ -93,7 +93,7 @@ export function DealSheet({ deal, companies, contacts, defaultStage = "prospect"
           </SheetDescription>
         </SheetHeader>
 
-        <form onSubmit={handleSubmit} id="deal-form">
+        <form onSubmit={handleSubmit} id="deal-form" className="flex-1 flex flex-col overflow-hidden">
           <SheetBody className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="title">Name *</Label>

@@ -97,7 +97,7 @@ export function LeadSheet({ lead, companies, contacts, trigger }: LeadSheetProps
           </SheetDescription>
         </SheetHeader>
 
-        <form onSubmit={handleSubmit} id="lead-form">
+        <form onSubmit={handleSubmit} id="lead-form" className="flex-1 flex flex-col overflow-hidden">
           <SheetBody className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="contact_name">Name *</Label>
