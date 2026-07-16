@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -83,7 +84,13 @@ export function LeadsClient({
     LO: "lost",
   };
 
+  const router = useRouter();
+
   const handleNodeClick = (nodeId: string) => {
+    if (nodeId === "D") {
+      router.push("/deals");
+      return;
+    }
     const status = NODE_TO_STATUS[nodeId];
     if (status) {
       setStatusFilter(status);
