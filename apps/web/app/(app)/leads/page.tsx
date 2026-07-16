@@ -1,11 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { TrendingUp, GitBranch } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import { LeadsClient } from "./_components/leads-client";
-import { MermaidDiagram } from "@/components/ui/mermaid";
 import { ImportDialog } from "@/components/crm/import-dialog";
-import { leadLifecycleChart, type LeadStatus } from "@/lib/pipeline-charts";
 
 export const metadata = { title: "Leads — CRM Portal" };
 
@@ -32,13 +30,7 @@ export default async function LeadsPage() {
       .order("first_name"),
   ]);
 
-  const lifecycleCounts = (["new", "contacted", "qualified", "lost"] as const).reduce(
-    (acc, status) => {
-      acc[status] = (leads ?? []).filter((l) => l.status === status).length;
-      return acc;
-    },
-    {} as Record<LeadStatus, number>
-  );
+
 
   const mapped = (leads ?? []).map((l) => {
     const { companies, contacts, ...rest } = l;
@@ -70,17 +62,7 @@ export default async function LeadsPage() {
         <ImportDialog entity="leads" />
       </div>
 
-      {(leads?.length ?? 0) > 0 && (
-        <details className="group rounded-xl border bg-card" open>
-          <summary className="flex cursor-pointer items-center gap-2 p-4 font-semibold text-sm select-none">
-            <GitBranch className="h-4 w-4 text-muted-foreground" />
-            Lead Lifecycle
-          </summary>
-          <div className="border-t p-4">
-            <MermaidDiagram chart={leadLifecycleChart(lifecycleCounts)} />
-          </div>
-        </details>
-      )}
+
 
       <LeadsClient leads={mapped} companies={companies ?? []} contacts={contacts ?? []} />
     </div>
