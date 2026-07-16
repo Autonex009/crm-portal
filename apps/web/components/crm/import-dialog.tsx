@@ -130,7 +130,7 @@ export function ImportDialog({ entity }: { entity: Entity }) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 min-w-0">
           <div className="flex items-center justify-between rounded-lg border border-dashed p-4">
             <div className="text-sm">
               <p className="font-medium">Need the right format?</p>
@@ -170,7 +170,7 @@ export function ImportDialog({ entity }: { entity: Entity }) {
               </span>
             </button>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 min-w-0">
               <div className="flex items-center justify-between rounded-md bg-muted/40 px-3 py-2 text-sm">
                 <span className="flex items-center gap-2 font-medium">
                   <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
@@ -182,7 +182,7 @@ export function ImportDialog({ entity }: { entity: Entity }) {
                 </Button>
               </div>
 
-              <div className="max-h-64 overflow-auto rounded-lg border">
+              <div className="max-h-64 w-full overflow-auto rounded-lg border">
                 <table className="w-full text-xs">
                   <thead className="sticky top-0 bg-muted/60">
                     <tr>
