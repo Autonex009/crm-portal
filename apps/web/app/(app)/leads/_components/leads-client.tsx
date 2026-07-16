@@ -14,10 +14,12 @@ import {
 import { LeadSheet } from "./lead-sheet";
 import { deleteLead, updateLeadStatus } from "@/lib/actions/leads";
 import { toast } from "@/components/ui/use-toast";
-import { TrendingUp, MoreHorizontal, Pencil, Trash2, Search } from "lucide-react";
+import { TrendingUp, MoreHorizontal, Pencil, Trash2, Search, GitBranch } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { MermaidDiagram } from "@/components/ui/mermaid";
+import { leadLifecycleChart, type LeadStatus } from "@/lib/pipeline-charts";
 
-type LeadStatus = "new" | "contacted" | "qualified" | "lost";
+
 
 interface Lead {
   id: string;
@@ -66,6 +68,28 @@ export function LeadsClient({
   const [statusFilter, setStatusFilter] = useState("all");
   const [isPending, startTransition] = useTransition();
 
+  const lifecycleCounts = (["new", "contacted", "qualified", "lost"] as const).reduce(
+    (acc, status) => {
+      acc[status] = leads.filter((l) => l.status === status).length;
+      return acc;
+    },
+    {} as Record<LeadStatus, number>
+  );
+
+  const NODE_TO_STATUS: Record<string, string> = {
+    NW: "new",
+    C: "contacted",
+    Q: "qualified",
+    LO: "lost",
+  };
+
+  const handleNodeClick = (nodeId: string) => {
+    const status = NODE_TO_STATUS[nodeId];
+    if (status) {
+      setStatusFilter(status);
+    }
+  };
+
   const filtered = leads.filter((l) => {
     const q = search.toLowerCase();
     const matchesSearch =
@@ -99,6 +123,21 @@ export function LeadsClient({
 
   return (
     <div className="space-y-4">
+      {leads.length > 0 && (
+        <details className="group rounded-xl border bg-card" open>
+          <summary className="flex cursor-pointer items-center gap-2 p-4 font-semibold text-sm select-none">
+            <GitBranch className="h-4 w-4 text-muted-foreground" />
+            Lead Lifecycle
+          </summary>
+          <div className="border-t p-4">
+            <MermaidDiagram
+              chart={leadLifecycleChart(lifecycleCounts)}
+              onNodeClick={handleNodeClick}
+            />
+          </div>
+        </details>
+      )}
+
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 min-w-48 max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />

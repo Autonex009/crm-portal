@@ -8,6 +8,7 @@ interface MermaidDiagramProps {
   /** Mermaid diagram source (e.g. a `flowchart LR ...` string). */
   chart: string;
   className?: string;
+  onNodeClick?: (nodeId: string) => void;
 }
 
 /**
@@ -15,11 +16,16 @@ interface MermaidDiagramProps {
  * dynamically imported and only runs after mount. The diagram re-renders when the
  * chart source or the active (light/dark) theme changes.
  */
-export function MermaidDiagram({ chart, className }: MermaidDiagramProps) {
+export function MermaidDiagram({ chart, className, onNodeClick }: MermaidDiagramProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const reactId = useId();
   const { resolvedTheme } = useTheme();
   const [error, setError] = useState<string | null>(null);
+
+  const onNodeClickRef = useRef(onNodeClick);
+  useEffect(() => {
+    onNodeClickRef.current = onNodeClick;
+  }, [onNodeClick]);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,6 +47,26 @@ export function MermaidDiagram({ chart, className }: MermaidDiagramProps) {
         if (!cancelled && containerRef.current) {
           containerRef.current.innerHTML = svg;
           setError(null);
+
+          const svgElement = containerRef.current.querySelector("svg");
+          if (svgElement) {
+            const nodes = svgElement.querySelectorAll(".node");
+            nodes.forEach((node) => {
+              const idAttr = node.getAttribute("id");
+              if (idAttr) {
+                const match = idAttr.match(/flowchart-([^-]+)-\d+/);
+                if (match && match[1]) {
+                  const nodeId = match[1];
+                  if (onNodeClickRef.current) {
+                    (node as HTMLElement).style.cursor = "pointer";
+                    node.addEventListener("click", () => {
+                      onNodeClickRef.current?.(nodeId);
+                    });
+                  }
+                }
+              }
+            });
+          }
         }
       } catch (err) {
         if (!cancelled) {
