@@ -70,10 +70,10 @@ export function leadLifecycleChart(counts: Record<LeadStatus, number>): string {
 
   return [
     "flowchart LR",
-    `  NW[${cell("new", "New")}] --> C[${cell("contacted", "Contacted")}]`,
-    `  C --> Q[${cell("qualified", "Qualified")}]`,
-    '  Q --> D["Converted to Deal 🤝"]',
-    `  C -. dropped .-> LO[${cell("lost", "Lost")}]`,
+    `  NW(${cell("new", "New")}) --> C(${cell("contacted", "Contacted")})`,
+    `  C --> Q(${cell("qualified", "Qualified")})`,
+    '  Q --> D("Converted to Deal 🤝")',
+    `  C -. dropped .-> LO(${cell("lost", "Lost")})`,
     `  NW -. dropped .-> LO`,
     "  class Q won",
     "  class D won",
