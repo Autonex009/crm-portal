@@ -52,9 +52,13 @@ interface Contact { id: string; first_name: string; last_name: string }
 const STATUS_FILTERS: { label: string; value: string }[] = [
   { label: "All", value: "all" },
   { label: "New", value: "new" },
-  { label: "Contacted", value: "contacted" },
-  { label: "Qualified", value: "qualified" },
-  { label: "Lost", value: "lost" },
+  { label: "Initial Count", value: "initial count" },
+  { label: "Deck Sent", value: "deck sent" },
+  { label: "Not Interested", value: "not interested" },
+  { label: "Call Scheduled", value: "call scheduled" },
+  { label: "Call Done", value: "call done" },
+  { label: "Proposal Sent", value: "proposal sent" },
+  { label: "Closed", value: "closed" },
 ];
 
 export function LeadsClient({
@@ -73,7 +77,7 @@ export function LeadsClient({
   const [statusFilter, setStatusFilter] = useState("all");
   const [isPending, startTransition] = useTransition();
 
-  const lifecycleCounts = (["new", "contacted", "qualified", "lost"] as const).reduce(
+  const lifecycleCounts = (["new", "initial count", "deck sent", "not interested", "call scheduled", "call done", "proposal sent", "closed"] as const).reduce(
     (acc, status) => {
       acc[status] = leads.filter((l) => l.status === status).length;
       return acc;
@@ -83,9 +87,13 @@ export function LeadsClient({
 
   const NODE_TO_STATUS: Record<string, string> = {
     NW: "new",
-    C: "contacted",
-    Q: "qualified",
-    LO: "lost",
+    IC: "initial count",
+    DS: "deck sent",
+    CS: "call scheduled",
+    CD: "call done",
+    PS: "proposal sent",
+    C: "closed",
+    NI: "not interested",
   };
 
   const router = useRouter();
@@ -310,7 +318,7 @@ export function LeadsClient({
                               }
                             />
                             <DropdownMenuSeparator />
-                            {(["new", "contacted", "qualified", "lost"] as const).map((s) => (
+                            {(["new", "initial count", "deck sent", "not interested", "call scheduled", "call done", "proposal sent", "closed"] as const).map((s) => (
                               s !== lead.status && (
                                 <DropdownMenuItem key={s} onClick={() => handleStatusChange(lead.id, s)}>
                                   Mark as {s}
