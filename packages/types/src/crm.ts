@@ -19,6 +19,7 @@ export const CompanySchema = z.object({
   logo_path: z.string().nullable(),
   owner_id: z.string().uuid(),
   deleted_at: z.string().datetime().nullable(),
+  archived_at: z.string().datetime().nullable(),
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
 });
@@ -41,6 +42,7 @@ export const ContactSchema = z.object({
   phone: z.string().nullable(),
   title: z.string().nullable(),
   deleted_at: z.string().datetime().nullable(),
+  archived_at: z.string().datetime().nullable(),
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
 });
@@ -76,6 +78,7 @@ export const LeadSchema = z.object({
   next_follow_up_date: z.string().date().nullable(),
   notes: z.string().nullable(),
   deleted_at: z.string().datetime().nullable(),
+  archived_at: z.string().datetime().nullable(),
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
 });

@@ -117,3 +117,49 @@ export async function deleteLead(id: string): Promise<ActionResult> {
   revalidatePath("/leads");
   return { success: true, data: undefined };
 }
+
+export async function archiveLead(id: string): Promise<ActionResult> {
+  const supabase = await createClient();
+  const user = await getAuthUser();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const { error } = await supabase
+    .from("leads")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath("/leads");
+  return { success: true, data: undefined };
+}
+
+export async function restoreLead(id: string): Promise<ActionResult> {
+  const supabase = await createClient();
+  const user = await getAuthUser();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const { error } = await supabase
+    .from("leads")
+    .update({ archived_at: null })
+    .eq("id", id);
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath("/leads");
+  return { success: true, data: undefined };
+}
+
+export async function hardDeleteLead(id: string): Promise<ActionResult> {
+  const supabase = await createClient();
+  const user = await getAuthUser();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const { error } = await supabase
+    .from("leads")
+    .delete()
+    .eq("id", id);
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath("/leads");
+  return { success: true, data: undefined };
+}
+
