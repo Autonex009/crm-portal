@@ -62,6 +62,29 @@ export function dealPipelineChart(
   ].join("\n");
 }
 
+export type QuoteStatus = "Draft" | "Presented" | "Accepted" | "Rejected" | "Closed";
+
+/**
+ * Lifecycle flow of quotes: Draft → Presented → Accepted → Closed, with a
+ * Rejected branch off Presented, mirroring how the deal pipeline branches to Lost.
+ */
+export function quotePipelineChart(counts: Record<QuoteStatus, number>): string {
+  const cell = (id: QuoteStatus, label: string) => `"${label}<br/>${counts[id]} quotes"`;
+
+  return [
+    "flowchart LR",
+    `  D[${cell("Draft", "Draft")}] --> P[${cell("Presented", "Presented")}]`,
+    `  P --> A[${cell("Accepted", "Accepted 🏆")}]`,
+    `  A --> C[${cell("Closed", "Closed")}]`,
+    `  P -. rejected .-> R[${cell("Rejected", "Rejected")}]`,
+    "  class A won",
+    "  class C won",
+    "  class R lost",
+    "  classDef won fill:#10b981,stroke:#059669,color:#ffffff;",
+    "  classDef lost fill:#ef4444,stroke:#dc2626,color:#ffffff;",
+  ].join("\n");
+}
+
 /**
  * Lifecycle flow of leads: count per status, with the qualified path feeding deals.
  */
