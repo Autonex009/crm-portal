@@ -14,6 +14,7 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ContactSheet } from "./contact-sheet";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { deleteContact, archiveContact, restoreContact, hardDeleteContact } from "@/lib/actions/contacts";
 import { toast } from "@/components/ui/use-toast";
 import { Users, MoreHorizontal, Pencil, Trash2, Search, Mail, Phone, Archive, RotateCcw } from "lucide-react";
@@ -47,6 +48,12 @@ export function ContactsClient({
   const [search, setSearch] = useState("");
   const [archiveSearch, setArchiveSearch] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [confirmAction, setConfirmAction] = useState<
+    | { type: "delete"; id: string; name: string }
+    | { type: "archive"; id: string; name: string }
+    | { type: "hardDelete"; id: string; name: string }
+    | null
+  >(null);
 
   const filtered = contacts.filter((c) => {
     const q = search.toLowerCase();
@@ -69,27 +76,11 @@ export function ContactsClient({
   });
 
   function handleDelete(id: string, name: string) {
-    if (!confirm(`Delete "${name}"?`)) return;
-    startTransition(async () => {
-      const result = await deleteContact(id);
-      if (result.success) {
-        toast({ title: "Contact deleted", variant: "success" });
-      } else {
-        toast({ title: "Error", description: result.error, variant: "destructive" });
-      }
-    });
+    setConfirmAction({ type: "delete", id, name });
   }
 
   function handleArchive(id: string, name: string) {
-    if (!confirm(`Archive "${name}"?`)) return;
-    startTransition(async () => {
-      const result = await archiveContact(id);
-      if (result.success) {
-        toast({ title: "Contact moved to archive", variant: "success" });
-      } else {
-        toast({ title: "Error", description: result.error, variant: "destructive" });
-      }
-    });
+    setConfirmAction({ type: "archive", id, name });
   }
 
   function handleRestore(id: string) {
@@ -104,14 +95,34 @@ export function ContactsClient({
   }
 
   function handleHardDelete(id: string, name: string) {
-    if (!confirm(`Permanently delete "${name}"? This cannot be undone.`)) return;
+    setConfirmAction({ type: "hardDelete", id, name });
+  }
+
+  function executeConfirmedAction() {
+    if (!confirmAction) return;
+    const { type, id } = confirmAction;
     startTransition(async () => {
-      const result = await hardDeleteContact(id);
+      const result =
+        type === "delete"
+          ? await deleteContact(id)
+          : type === "archive"
+          ? await archiveContact(id)
+          : await hardDeleteContact(id);
+
       if (result.success) {
-        toast({ title: "Contact permanently deleted", variant: "success" });
+        toast({
+          title:
+            type === "delete"
+              ? "Contact deleted"
+              : type === "archive"
+              ? "Contact moved to archive"
+              : "Contact permanently deleted",
+          variant: "success",
+        });
       } else {
         toast({ title: "Error", description: result.error, variant: "destructive" });
       }
+      setConfirmAction(null);
     });
   }
 
@@ -325,6 +336,23 @@ export function ContactsClient({
           <p className="text-xs text-muted-foreground">{filteredArchived.length} of {archivedContacts.length} archived contacts</p>
         </TabsContent>
       </Tabs>
+
+      <ConfirmDialog
+        open={!!confirmAction}
+        onOpenChange={(open) => !open && setConfirmAction(null)}
+        description={
+          confirmAction?.type === "archive"
+            ? `This will move "${confirmAction.name}" to the archive.`
+            : confirmAction?.type === "hardDelete"
+            ? `This will permanently delete "${confirmAction.name}". This cannot be undone.`
+            : confirmAction
+            ? `This will delete "${confirmAction.name}".`
+            : undefined
+        }
+        destructive={confirmAction?.type !== "archive"}
+        loading={isPending}
+        onConfirm={executeConfirmedAction}
+      />
     </div>
   );
 }

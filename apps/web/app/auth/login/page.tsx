@@ -1,13 +1,13 @@
 import { LoginForm } from "@/components/auth/login-form";
 
-export const metadata = { title: "Sign In — CRM Portal" };
+export const metadata = { title: "Sign In — DealBridge" };
 
 export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight">CRM Portal</h1>
+          <h1 className="text-3xl font-bold tracking-tight">DealBridge</h1>
           <p className="mt-2 text-muted-foreground">Sign in to your account</p>
         </div>
         <LoginForm />

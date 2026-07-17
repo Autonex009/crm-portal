@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+// @ts-ignore
 import "./globals.css";
 import { Providers } from "./providers";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "CRM Portal",
+  title: "DealBridge",
   description: "Production-grade CRM with Slack, Google Calendar, and more.",
 };
 

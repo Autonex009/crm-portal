@@ -14,7 +14,7 @@ import { ContactSheet } from "../../contacts/_components/contact-sheet";
 import { formatDate, formatCurrency, initials } from "@/lib/utils";
 import { DealStageBadge } from "@/components/ui/badge";
 
-export const metadata = { title: "Company Details — CRM Portal" };
+export const metadata = { title: "Company Details — DealBridge" };
 
 export default async function CompanyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

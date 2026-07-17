@@ -6,7 +6,7 @@ import { LeadsClient } from "./_components/leads-client";
 import { ImportDialog } from "@/components/crm/import-dialog";
 import { type LeadStatus } from "@/lib/pipeline-charts";
 
-export const metadata = { title: "Leads — CRM Portal" };
+export const metadata = { title: "Leads — DealBridge" };
 
 export default async function LeadsPage() {
   const supabase = await createClient();

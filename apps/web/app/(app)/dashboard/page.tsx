@@ -5,7 +5,7 @@ import { Building2, Handshake, FileText, TrendingUp, ArrowUpRight } from "lucide
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 
-export const metadata = { title: "Dashboard — CRM Portal" };
+export const metadata = { title: "Dashboard — DealBridge" };
 
 export default async function DashboardPage() {
   const supabase = await createClient();

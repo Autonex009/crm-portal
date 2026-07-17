@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LeadSheet } from "./lead-sheet";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { deleteLead, updateLeadStatus, archiveLead, restoreLead, hardDeleteLead } from "@/lib/actions/leads";
 import { toast } from "@/components/ui/use-toast";
 import { TrendingUp, MoreHorizontal, Pencil, Trash2, Search, GitBranch, Archive, RotateCcw } from "lucide-react";
@@ -76,6 +77,12 @@ export function LeadsClient({
   const [archiveSearch, setArchiveSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isPending, startTransition] = useTransition();
+  const [confirmAction, setConfirmAction] = useState<
+    | { type: "delete"; id: string }
+    | { type: "archive"; id: string }
+    | { type: "hardDelete"; id: string }
+    | null
+  >(null);
 
   const lifecycleCounts = (["new", "initial count", "deck sent", "not interested", "call scheduled", "call done", "proposal sent", "closed"] as const).reduce(
     (acc, status) => {
@@ -139,21 +146,11 @@ export function LeadsClient({
   });
 
   function handleDelete(id: string) {
-    if (!confirm("Delete this lead?")) return;
-    startTransition(async () => {
-      const result = await deleteLead(id);
-      if (result.success) toast({ title: "Lead deleted", variant: "success" });
-      else toast({ title: "Error", description: result.error, variant: "destructive" });
-    });
+    setConfirmAction({ type: "delete", id });
   }
 
   function handleArchive(id: string) {
-    if (!confirm("Archive this lead?")) return;
-    startTransition(async () => {
-      const result = await archiveLead(id);
-      if (result.success) toast({ title: "Lead moved to archive", variant: "success" });
-      else toast({ title: "Error", description: result.error, variant: "destructive" });
-    });
+    setConfirmAction({ type: "archive", id });
   }
 
   function handleRestore(id: string) {
@@ -165,11 +162,34 @@ export function LeadsClient({
   }
 
   function handleHardDelete(id: string) {
-    if (!confirm("Permanently delete this lead? This cannot be undone.")) return;
+    setConfirmAction({ type: "hardDelete", id });
+  }
+
+  function executeConfirmedAction() {
+    if (!confirmAction) return;
+    const { type, id } = confirmAction;
     startTransition(async () => {
-      const result = await hardDeleteLead(id);
-      if (result.success) toast({ title: "Lead permanently deleted", variant: "success" });
-      else toast({ title: "Error", description: result.error, variant: "destructive" });
+      const result =
+        type === "delete"
+          ? await deleteLead(id)
+          : type === "archive"
+          ? await archiveLead(id)
+          : await hardDeleteLead(id);
+
+      if (result.success) {
+        toast({
+          title:
+            type === "delete"
+              ? "Lead deleted"
+              : type === "archive"
+              ? "Lead moved to archive"
+              : "Lead permanently deleted",
+          variant: "success",
+        });
+      } else {
+        toast({ title: "Error", description: result.error, variant: "destructive" });
+      }
+      setConfirmAction(null);
     });
   }
 
@@ -451,6 +471,23 @@ export function LeadsClient({
           <p className="text-xs text-muted-foreground">{filteredArchived.length} of {archivedLeads.length} archived leads</p>
         </TabsContent>
       </Tabs>
+
+      <ConfirmDialog
+        open={!!confirmAction}
+        onOpenChange={(open) => !open && setConfirmAction(null)}
+        description={
+          confirmAction?.type === "archive"
+            ? "This will move this lead to the archive."
+            : confirmAction?.type === "hardDelete"
+            ? "This will permanently delete this lead. This cannot be undone."
+            : confirmAction
+            ? "This will delete this lead."
+            : undefined
+        }
+        destructive={confirmAction?.type !== "archive"}
+        loading={isPending}
+        onConfirm={executeConfirmedAction}
+      />
     </div>
   );
 }

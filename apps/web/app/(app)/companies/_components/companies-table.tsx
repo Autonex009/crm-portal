@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CompanySheet } from "./company-sheet";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { deleteCompany, archiveCompany, restoreCompany, hardDeleteCompany } from "@/lib/actions/companies";
 import { toast } from "@/components/ui/use-toast";
 import { Building2, MoreHorizontal, Pencil, Trash2, ExternalLink, Search, Archive, RotateCcw } from "lucide-react";
@@ -38,6 +39,12 @@ export function CompaniesTable({
   const [search, setSearch] = useState("");
   const [archiveSearch, setArchiveSearch] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [confirmAction, setConfirmAction] = useState<
+    | { type: "delete"; id: string; name: string }
+    | { type: "archive"; id: string; name: string }
+    | { type: "hardDelete"; id: string; name: string }
+    | null
+  >(null);
 
   const filtered = companies.filter(
     (c) =>
@@ -54,27 +61,11 @@ export function CompaniesTable({
   );
 
   function handleDelete(id: string, name: string) {
-    if (!confirm(`Delete "${name}"?`)) return;
-    startTransition(async () => {
-      const result = await deleteCompany(id);
-      if (result.success) {
-        toast({ title: "Company deleted", variant: "success" });
-      } else {
-        toast({ title: "Error", description: result.error, variant: "destructive" });
-      }
-    });
+    setConfirmAction({ type: "delete", id, name });
   }
 
   function handleArchive(id: string, name: string) {
-    if (!confirm(`Archive "${name}"?`)) return;
-    startTransition(async () => {
-      const result = await archiveCompany(id);
-      if (result.success) {
-        toast({ title: "Company moved to archive", variant: "success" });
-      } else {
-        toast({ title: "Error", description: result.error, variant: "destructive" });
-      }
-    });
+    setConfirmAction({ type: "archive", id, name });
   }
 
   function handleRestore(id: string) {
@@ -89,14 +80,34 @@ export function CompaniesTable({
   }
 
   function handleHardDelete(id: string, name: string) {
-    if (!confirm(`Permanently delete "${name}"? This cannot be undone.`)) return;
+    setConfirmAction({ type: "hardDelete", id, name });
+  }
+
+  function executeConfirmedAction() {
+    if (!confirmAction) return;
+    const { type, id } = confirmAction;
     startTransition(async () => {
-      const result = await hardDeleteCompany(id);
+      const result =
+        type === "delete"
+          ? await deleteCompany(id)
+          : type === "archive"
+          ? await archiveCompany(id)
+          : await hardDeleteCompany(id);
+
       if (result.success) {
-        toast({ title: "Company permanently deleted", variant: "success" });
+        toast({
+          title:
+            type === "delete"
+              ? "Company deleted"
+              : type === "archive"
+              ? "Company moved to archive"
+              : "Company permanently deleted",
+          variant: "success",
+        });
       } else {
         toast({ title: "Error", description: result.error, variant: "destructive" });
       }
+      setConfirmAction(null);
     });
   }
 
@@ -340,6 +351,23 @@ export function CompaniesTable({
           </p>
         </TabsContent>
       </Tabs>
+
+      <ConfirmDialog
+        open={!!confirmAction}
+        onOpenChange={(open) => !open && setConfirmAction(null)}
+        description={
+          confirmAction?.type === "archive"
+            ? `This will move "${confirmAction.name}" to the archive.`
+            : confirmAction?.type === "hardDelete"
+            ? `This will permanently delete "${confirmAction.name}". This cannot be undone.`
+            : confirmAction
+            ? `This will delete "${confirmAction.name}".`
+            : undefined
+        }
+        destructive={confirmAction?.type !== "archive"}
+        loading={isPending}
+        onConfirm={executeConfirmedAction}
+      />
     </div>
   );
 }

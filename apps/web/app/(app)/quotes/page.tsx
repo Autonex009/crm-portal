@@ -1,6 +1,6 @@
 import { FileText } from "lucide-react";
 
-export const metadata = { title: "Quotes — CRM Portal" };
+export const metadata = { title: "Quotes — DealBridge" };
 
 export default function QuotesPage() {
   return (

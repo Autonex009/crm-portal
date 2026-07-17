@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { Building2 } from "lucide-react";
 import { CompaniesTable } from "./_components/companies-table";
 
-export const metadata = { title: "Companies — CRM Portal" };
+export const metadata = { title: "Companies — DealBridge" };
 
 export default async function CompaniesPage() {
   const supabase = await createClient();
