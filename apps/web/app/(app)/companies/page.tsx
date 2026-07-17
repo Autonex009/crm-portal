@@ -11,11 +11,20 @@ export default async function CompaniesPage() {
   const user = await getAuthUser();
   if (!user) redirect("/auth/login");
 
-  const { data: companies } = await supabase
-    .from("companies")
-    .select("id, name, domain, industry, owner_id, created_at")
-    .is("deleted_at", null)
-    .order("name");
+  const [{ data: companies }, { data: archivedCompanies }] = await Promise.all([
+    supabase
+      .from("companies")
+      .select("id, name, domain, industry, owner_id, created_at, deleted_at, archived_at")
+      .is("deleted_at", null)
+      .is("archived_at", null)
+      .order("name"),
+    supabase
+      .from("companies")
+      .select("id, name, domain, industry, owner_id, created_at, deleted_at, archived_at")
+      .is("deleted_at", null)
+      .not("archived_at", "is", null)
+      .order("name"),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -29,7 +38,11 @@ export default async function CompaniesPage() {
         </p>
       </div>
 
-      <CompaniesTable companies={companies ?? []} />
+      <CompaniesTable
+        companies={companies ?? []}
+        archivedCompanies={archivedCompanies ?? []}
+      />
     </div>
   );
 }
+
