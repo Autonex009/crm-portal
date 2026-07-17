@@ -1,6 +1,6 @@
 import { Receipt } from "lucide-react";
 
-export const metadata = { title: "Invoices — CRM Portal" };
+export const metadata = { title: "Invoices — DealBridge" };
 
 export default function InvoicesPage() {
   return (

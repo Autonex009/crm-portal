@@ -9,7 +9,7 @@ import { ContactSheet } from "./_components/contact-sheet";
 import { ContactsClient } from "./_components/contacts-client";
 import { getAuthUser } from "@/lib/auth";
 
-export const metadata = { title: "Contacts — CRM Portal" };
+export const metadata = { title: "Contacts — DealBridge" };
 
 export default async function ContactsPage() {
   const supabase = await createClient();

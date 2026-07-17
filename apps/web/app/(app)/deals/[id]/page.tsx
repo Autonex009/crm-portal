@@ -12,7 +12,7 @@ import { MermaidDiagram } from "@/components/ui/mermaid";
 import { dealStageFlowChart, type DealStage as ChartDealStage } from "@/lib/pipeline-charts";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
-export const metadata = { title: "Deal Details — CRM Portal" };
+export const metadata = { title: "Deal Details — DealBridge" };
 
 export default async function DealDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

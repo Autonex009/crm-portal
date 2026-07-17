@@ -7,7 +7,7 @@ import { MermaidDiagram } from "@/components/ui/mermaid";
 import { ImportDialog } from "@/components/crm/import-dialog";
 import { dealPipelineChart } from "@/lib/pipeline-charts";
 
-export const metadata = { title: "Deals — CRM Portal" };
+export const metadata = { title: "Deals — DealBridge" };
 
 export default async function DealsPage() {
   const supabase = await createClient();
