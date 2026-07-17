@@ -65,7 +65,9 @@ jobs:
         run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
 
       - name: Push migrations
-        run: supabase db push
+        # --include-all applies pending migrations even when a newer migration
+        # is already on the remote (out-of-order timestamps from parallel branches).
+        run: supabase db push --include-all
 
   # ── Stage 3: build & deploy the web app to Railway ─────────────────────────
   # Runs after migrate succeeds OR is skipped (no migration changes), but never
