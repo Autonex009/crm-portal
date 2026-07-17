@@ -36,17 +36,22 @@ function Badge({ className, variant, ...props }: BadgeProps) {
 
 export { Badge, badgeVariants };
 
-export type LeadStatus = "new" | "contacted" | "qualified" | "lost";
+export type LeadStatus = "new" | "initial count" | "deck sent" | "not interested" | "call scheduled" | "call done" | "proposal sent" | "closed";
 export type DealStage = "prospect" | "proposal" | "negotiation" | "won" | "lost";
 
+const LEAD_STATUS_CONFIG: Record<LeadStatus, { label: string; variant: BadgeProps["variant"] }> = {
+  "new": { label: "New", variant: "default" },
+  "initial count": { label: "Initial Count", variant: "warning" },
+  "deck sent": { label: "Deck Sent", variant: "secondary" },
+  "not interested": { label: "Not Interested", variant: "destructive" },
+  "call scheduled": { label: "Call Scheduled", variant: "warning" },
+  "call done": { label: "Call Done", variant: "secondary" },
+  "proposal sent": { label: "Proposal Sent", variant: "secondary" },
+  "closed": { label: "Closed", variant: "success" },
+};
+
 export function LeadStatusBadge({ status }: { status: LeadStatus }) {
-  const map: Record<LeadStatus, { label: string; variant: VariantProps<typeof badgeVariants>["variant"] }> = {
-    new: { label: "New", variant: "info" },
-    contacted: { label: "Contacted", variant: "warning" },
-    qualified: { label: "Qualified", variant: "success" },
-    lost: { label: "Lost", variant: "destructive" },
-  };
-  const { label, variant } = map[status];
+  const { label, variant } = LEAD_STATUS_CONFIG[status];
   return <Badge variant={variant}>{label}</Badge>;
 }
 

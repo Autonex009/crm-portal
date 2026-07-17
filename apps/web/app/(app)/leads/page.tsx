@@ -4,8 +4,9 @@ import { redirect } from "next/navigation";
 import { TrendingUp } from "lucide-react";
 import { LeadsClient } from "./_components/leads-client";
 import { ImportDialog } from "@/components/crm/import-dialog";
+import { type LeadStatus } from "@/lib/pipeline-charts";
 
-export const metadata = { title: "Leads — CRM Portal" };
+export const metadata = { title: "Leads — DealBridge" };
 
 export default async function LeadsPage() {
   const supabase = await createClient();
@@ -49,6 +50,7 @@ export default async function LeadsPage() {
     const linkedContact = Array.isArray(contacts) ? contacts[0] : contacts;
     return {
       ...rest,
+      status: l.status as LeadStatus,
       title: l.title ?? null,
       company_name: Array.isArray(companies)
         ? (companies[0] as { name: string } | undefined)?.name ?? null

@@ -27,7 +27,16 @@ const LeadInput = z.object({
   location: emptyToNull,
   product_interest: emptyToNull,
   source: z.string().max(100).nullable().optional(),
-  status: z.enum(["new", "contacted", "qualified", "lost"]).default("new"),
+  status: z.enum([
+    "new", 
+    "initial count", 
+    "deck sent", 
+    "not interested", 
+    "call scheduled", 
+    "call done", 
+    "proposal sent", 
+    "closed"
+  ]).default("new"),
   value_estimate: z.coerce.number().nonnegative().nullable().optional(),
   next_follow_up_date: emptyToNull,
   notes: emptyToNull,
@@ -90,7 +99,7 @@ export async function updateLead(id: string, formData: FormData): Promise<Action
 
 export async function updateLeadStatus(
   id: string,
-  status: "new" | "contacted" | "qualified" | "lost"
+  status: "new" | "initial count" | "deck sent" | "not interested" | "call scheduled" | "call done" | "proposal sent" | "closed"
 ): Promise<ActionResult> {
   const supabase = await createClient();
   const user = await getAuthUser();

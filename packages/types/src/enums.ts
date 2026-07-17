@@ -3,7 +3,16 @@ import { z } from "zod";
 export const UserRoleSchema = z.enum(["admin", "sales", "account_manager", "client"]);
 export type UserRole = z.infer<typeof UserRoleSchema>;
 
-export const LeadStatusSchema = z.enum(["new", "contacted", "qualified", "lost"]);
+export const LeadStatusSchema = z.enum([
+  "new", 
+  "initial count", 
+  "deck sent", 
+  "not interested", 
+  "call scheduled", 
+  "call done", 
+  "proposal sent", 
+  "closed"
+]);
 export type LeadStatus = z.infer<typeof LeadStatusSchema>;
 
 export const DealStageSchema = z.enum(["prospect", "proposal", "negotiation", "won", "lost"]);

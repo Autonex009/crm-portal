@@ -1,7 +1,7 @@
 import { formatCurrency } from "@/lib/utils";
 
 export type DealStage = "prospect" | "proposal" | "negotiation" | "won" | "lost";
-export type LeadStatus = "new" | "contacted" | "qualified" | "lost";
+export type LeadStatus = "new" | "initial count" | "deck sent" | "not interested" | "call scheduled" | "call done" | "proposal sent" | "closed";
 
 const DEAL_FLOW: { id: DealStage; node: string; label: string }[] = [
   { id: "prospect", node: "P", label: "Prospect" },
@@ -70,14 +70,18 @@ export function leadLifecycleChart(counts: Record<LeadStatus, number>): string {
 
   return [
     "flowchart LR",
-    `  NW(${cell("new", "New")}) --> C(${cell("contacted", "Contacted")})`,
-    `  C --> Q(${cell("qualified", "Qualified")})`,
-    '  Q --> D("Converted to Deal 🤝")',
-    `  C -. dropped .-> LO(${cell("lost", "Lost")})`,
-    `  NW -. dropped .-> LO`,
-    "  class Q won",
-    "  class D won",
-    "  class LO lost",
+    `  NW(${cell("new", "New")}) --> IC(${cell("initial count", "Initial Count")})`,
+    `  IC --> DS(${cell("deck sent", "Deck Sent")})`,
+    `  IC --> CS(${cell("call scheduled", "Call Scheduled")})`,
+    `  CS --> CD(${cell("call done", "Call Done")})`,
+    `  CD --> PS(${cell("proposal sent", "Proposal Sent")})`,
+    `  PS --> C(${cell("closed", "Closed")})`,
+    `  NW -. dropped .-> NI(${cell("not interested", "Not Interested")})`,
+    `  IC -. dropped .-> NI`,
+    `  CS -. dropped .-> NI`,
+    `  PS -. dropped .-> NI`,
+    "  class C won",
+    "  class NI lost",
     "  classDef won fill:#10b981,stroke:#059669,color:#ffffff;",
     "  classDef lost fill:#ef4444,stroke:#dc2626,color:#ffffff;",
   ].join("\n");

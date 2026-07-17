@@ -47,7 +47,16 @@ function toIsoDate(val: string | null): string | null {
   return d.toISOString().slice(0, 10);
 }
 
-const LEAD_STATUSES = ["new", "contacted", "qualified", "lost"] as const;
+const LEAD_STATUSES = [
+  "new", 
+  "initial count", 
+  "deck sent", 
+  "not interested", 
+  "call scheduled", 
+  "call done", 
+  "proposal sent", 
+  "closed"
+] as const;
 const DEAL_STAGES = ["prospect", "proposal", "negotiation", "won", "lost"] as const;
 type LeadStatus = (typeof LEAD_STATUSES)[number];
 type DealStage = (typeof DEAL_STAGES)[number];

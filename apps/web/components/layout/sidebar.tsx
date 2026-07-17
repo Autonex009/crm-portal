@@ -31,7 +31,7 @@ export function Sidebar() {
   return (
     <aside className="flex h-screen w-60 flex-col border-r bg-card">
       <div className="flex h-14 items-center border-b px-6">
-        <span className="text-lg font-bold tracking-tight">CRM Portal</span>
+        <span className="text-lg font-bold tracking-tight">DealBridge</span>
       </div>
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
         {nav.map(({ href, label, icon: Icon }) => (
