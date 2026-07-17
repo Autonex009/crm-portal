@@ -12,27 +12,39 @@ export default async function LeadsPage() {
   const user = await getAuthUser();
   if (!user) redirect("/auth/login");
 
-  const [{ data: leads }, { data: companies }, { data: contacts }] = await Promise.all([
+  const [
+    { data: leads },
+    { data: archivedLeads },
+    { data: companies },
+    { data: contacts }
+  ] = await Promise.all([
     supabase
       .from("leads")
-      .select("id, title, contact_name, job_title, company_id, contact_id, email, phone, linkedin_url, industry, location, product_interest, source, status, value_estimate, next_follow_up_date, notes, created_at, companies(name), contacts(first_name, last_name)")
+      .select("id, title, contact_name, job_title, company_id, contact_id, email, phone, linkedin_url, industry, location, product_interest, source, status, value_estimate, next_follow_up_date, notes, deleted_at, archived_at, created_at, companies(name), contacts(first_name, last_name)")
       .is("deleted_at", null)
+      .is("archived_at", null)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("leads")
+      .select("id, title, contact_name, job_title, company_id, contact_id, email, phone, linkedin_url, industry, location, product_interest, source, status, value_estimate, next_follow_up_date, notes, deleted_at, archived_at, created_at, companies(name), contacts(first_name, last_name)")
+      .is("deleted_at", null)
+      .not("archived_at", "is", null)
       .order("created_at", { ascending: false }),
     supabase
       .from("companies")
       .select("id, name")
       .is("deleted_at", null)
+      .is("archived_at", null)
       .order("name"),
     supabase
       .from("contacts")
       .select("id, first_name, last_name")
       .is("deleted_at", null)
+      .is("archived_at", null)
       .order("first_name"),
   ]);
 
-
-
-  const mapped = (leads ?? []).map((l) => {
+  const mapLead = (l: any) => {
     const { companies, contacts, ...rest } = l;
     const linkedContact = Array.isArray(contacts) ? contacts[0] : contacts;
     return {
@@ -45,7 +57,10 @@ export default async function LeadsPage() {
         ? `${(linkedContact as { first_name: string; last_name: string }).first_name} ${(linkedContact as { first_name: string; last_name: string }).last_name}`
         : null,
     };
-  });
+  };
+
+  const mapped = (leads ?? []).map(mapLead);
+  const mappedArchived = (archivedLeads ?? []).map(mapLead);
 
   return (
     <div className="space-y-6">
@@ -62,9 +77,13 @@ export default async function LeadsPage() {
         <ImportDialog entity="leads" />
       </div>
 
-
-
-      <LeadsClient leads={mapped} companies={companies ?? []} contacts={contacts ?? []} />
+      <LeadsClient
+        leads={mapped}
+        archivedLeads={mappedArchived}
+        companies={companies ?? []}
+        contacts={contacts ?? []}
+      />
     </div>
   );
 }
+

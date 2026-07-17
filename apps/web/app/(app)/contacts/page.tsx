@@ -16,23 +16,40 @@ export default async function ContactsPage() {
   const user = await getAuthUser();
   if (!user) redirect("/auth/login");
 
-  const [{ data: contacts }, { data: companies }] = await Promise.all([
+  const [
+    { data: contacts },
+    { data: archivedContacts },
+    { data: companies }
+  ] = await Promise.all([
     supabase
       .from("contacts")
-      .select("id, first_name, last_name, email, phone, title, company_id, companies(name)")
+      .select("id, first_name, last_name, email, phone, title, company_id, deleted_at, archived_at, companies(name)")
       .is("deleted_at", null)
+      .is("archived_at", null)
+      .order("first_name"),
+    supabase
+      .from("contacts")
+      .select("id, first_name, last_name, email, phone, title, company_id, deleted_at, archived_at, companies(name)")
+      .is("deleted_at", null)
+      .not("archived_at", "is", null)
       .order("first_name"),
     supabase
       .from("companies")
       .select("id, name")
       .is("deleted_at", null)
+      .is("archived_at", null)
       .order("name"),
   ]);
 
-  const mapped = (contacts ?? []).map((c) => ({
+  const mapContact = (c: any) => ({
     ...c,
-    company_name: Array.isArray(c.companies) ? (c.companies[0] as { name: string } | undefined)?.name ?? null : (c.companies as { name: string } | null)?.name ?? null,
-  }));
+    company_name: Array.isArray(c.companies)
+      ? (c.companies[0] as { name: string } | undefined)?.name ?? null
+      : (c.companies as { name: string } | null)?.name ?? null,
+  });
+
+  const mapped = (contacts ?? []).map(mapContact);
+  const mappedArchived = (archivedContacts ?? []).map(mapContact);
 
   return (
     <div className="space-y-6">
@@ -46,7 +63,12 @@ export default async function ContactsPage() {
         </p>
       </div>
 
-      <ContactsClient contacts={mapped} companies={companies ?? []} />
+      <ContactsClient
+        contacts={mapped}
+        archivedContacts={mappedArchived}
+        companies={companies ?? []}
+      />
     </div>
   );
 }
+

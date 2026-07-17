@@ -27,6 +27,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
     .select("*")
     .eq("id", id)
     .is("deleted_at", null)
+    .is("archived_at", null)
     .single();
 
   if (!company) notFound();
@@ -37,6 +38,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
       .select("id, first_name, last_name, email, phone, title")
       .eq("company_id", id)
       .is("deleted_at", null)
+      .is("archived_at", null)
       .order("first_name"),
     supabase
       .from("deals")

@@ -18,8 +18,8 @@ export default async function DashboardPage() {
     { data: deals },
     { data: recentActivity },
   ] = await Promise.all([
-    supabase.from("companies").select("*", { count: "exact", head: true }).is("deleted_at", null),
-    supabase.from("leads").select("*", { count: "exact", head: true }).is("deleted_at", null).neq("status", "lost"),
+    supabase.from("companies").select("*", { count: "exact", head: true }).is("deleted_at", null).is("archived_at", null),
+    supabase.from("leads").select("*", { count: "exact", head: true }).is("deleted_at", null).is("archived_at", null).neq("status", "lost"),
     supabase.from("deals").select("id, title, stage, amount, probability, next_action, companies(name)").is("deleted_at", null).order("updated_at", { ascending: false }),
     supabase
       .from("activities")

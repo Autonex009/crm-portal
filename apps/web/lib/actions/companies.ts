@@ -72,3 +72,49 @@ export async function deleteCompany(id: string): Promise<ActionResult> {
   revalidatePath("/companies");
   return { success: true, data: undefined };
 }
+
+export async function archiveCompany(id: string): Promise<ActionResult> {
+  const supabase = await createClient();
+  const user = await getAuthUser();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const { error } = await supabase
+    .from("companies")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath("/companies");
+  return { success: true, data: undefined };
+}
+
+export async function restoreCompany(id: string): Promise<ActionResult> {
+  const supabase = await createClient();
+  const user = await getAuthUser();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const { error } = await supabase
+    .from("companies")
+    .update({ archived_at: null })
+    .eq("id", id);
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath("/companies");
+  return { success: true, data: undefined };
+}
+
+export async function hardDeleteCompany(id: string): Promise<ActionResult> {
+  const supabase = await createClient();
+  const user = await getAuthUser();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const { error } = await supabase
+    .from("companies")
+    .delete()
+    .eq("id", id);
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath("/companies");
+  return { success: true, data: undefined };
+}
+

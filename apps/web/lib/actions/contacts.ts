@@ -81,3 +81,49 @@ export async function deleteContact(id: string): Promise<ActionResult> {
   revalidatePath("/contacts");
   return { success: true, data: undefined };
 }
+
+export async function archiveContact(id: string): Promise<ActionResult> {
+  const supabase = await createClient();
+  const user = await getAuthUser();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const { error } = await supabase
+    .from("contacts")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath("/contacts");
+  return { success: true, data: undefined };
+}
+
+export async function restoreContact(id: string): Promise<ActionResult> {
+  const supabase = await createClient();
+  const user = await getAuthUser();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const { error } = await supabase
+    .from("contacts")
+    .update({ archived_at: null })
+    .eq("id", id);
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath("/contacts");
+  return { success: true, data: undefined };
+}
+
+export async function hardDeleteContact(id: string): Promise<ActionResult> {
+  const supabase = await createClient();
+  const user = await getAuthUser();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const { error } = await supabase
+    .from("contacts")
+    .delete()
+    .eq("id", id);
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath("/contacts");
+  return { success: true, data: undefined };
+}
+

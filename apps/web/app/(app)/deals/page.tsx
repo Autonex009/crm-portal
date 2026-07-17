@@ -24,11 +24,13 @@ export default async function DealsPage() {
       .from("companies")
       .select("id, name")
       .is("deleted_at", null)
+      .is("archived_at", null)
       .order("name"),
     supabase
       .from("contacts")
       .select("id, first_name, last_name")
       .is("deleted_at", null)
+      .is("archived_at", null)
       .order("first_name"),
   ]);
 

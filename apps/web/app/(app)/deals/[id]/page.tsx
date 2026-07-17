@@ -38,8 +38,8 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
     .limit(30);
 
   const [{ data: companies }, { data: contacts }] = await Promise.all([
-    supabase.from("companies").select("id, name").is("deleted_at", null).order("name"),
-    supabase.from("contacts").select("id, first_name, last_name").is("deleted_at", null).order("first_name"),
+    supabase.from("companies").select("id, name").is("deleted_at", null).is("archived_at", null).order("name"),
+    supabase.from("contacts").select("id, first_name, last_name").is("deleted_at", null).is("archived_at", null).order("first_name"),
   ]);
 
   const mappedActivities = (activities ?? []).map((a) => ({
