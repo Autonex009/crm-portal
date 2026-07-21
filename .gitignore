@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+apps/mock-api/node_modules/
 .pnp
 .pnp.js
 
@@ -8,6 +9,9 @@ node_modules/
 dist/
 build/
 .turbo/
+.vercel/
+apps/mock-api/dist/
+apps/mock-api/.vercel/
 *.tsbuildinfo
 
 # Environment
