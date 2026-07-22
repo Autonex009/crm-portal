@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build & Deployment
+dist/
+.vercel/
+*.tsbuildinfo
+
+# Logs & Environment
+*.log
+.env
+.env.local
