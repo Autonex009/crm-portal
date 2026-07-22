@@ -18,6 +18,7 @@ export type IntegrationConnection = z.infer<typeof IntegrationConnectionSchema>;
 export const CalendarEventSchema = z.object({
   id: z.string().uuid(),
   deal_id: z.string().uuid().nullable(),
+  lead_id: z.string().uuid().nullable(),
   google_event_id: z.string(),
   title: z.string(),
   start_at: z.string().datetime(),

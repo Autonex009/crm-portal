@@ -13,10 +13,11 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LeadSheet } from "./lead-sheet";
+import { ScheduleMeetingDialog } from "./schedule-meeting-dialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { deleteLead, updateLeadStatus, archiveLead, restoreLead, hardDeleteLead } from "@/lib/actions/leads";
 import { toast } from "@/components/ui/use-toast";
-import { TrendingUp, MoreHorizontal, Pencil, Trash2, Search, GitBranch, Archive, RotateCcw } from "lucide-react";
+import { TrendingUp, MoreHorizontal, Pencil, Trash2, Search, GitBranch, Archive, RotateCcw, Video } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { MermaidDiagram } from "@/components/ui/mermaid";
 import { leadLifecycleChart, type LeadStatus } from "@/lib/pipeline-charts";
@@ -76,6 +77,7 @@ export function LeadsClient({
   const [search, setSearch] = useState("");
   const [archiveSearch, setArchiveSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [scheduleFor, setScheduleFor] = useState<Lead | null>(null);
   const [isPending, startTransition] = useTransition();
   const [confirmAction, setConfirmAction] = useState<
     | { type: "delete"; id: string }
@@ -337,6 +339,10 @@ export function LeadsClient({
                                 </DropdownMenuItem>
                               }
                             />
+                            <DropdownMenuItem onClick={() => setScheduleFor(lead)}>
+                              <Video className="h-4 w-4" />
+                              Schedule Google Meet
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             {(["new", "initial count", "deck sent", "not interested", "call scheduled", "call done", "proposal sent", "closed"] as const).map((s) => (
                               s !== lead.status && (
@@ -487,6 +493,11 @@ export function LeadsClient({
         destructive={confirmAction?.type !== "archive"}
         loading={isPending}
         onConfirm={executeConfirmedAction}
+      />
+
+      <ScheduleMeetingDialog
+        lead={scheduleFor}
+        onOpenChange={(open) => !open && setScheduleFor(null)}
       />
     </div>
   );

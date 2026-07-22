@@ -126,6 +126,7 @@ export type Database = {
           end_at: string
           google_event_id: string
           id: string
+          lead_id: string | null
           meet_link: string | null
           start_at: string
           synced_at: string
@@ -138,6 +139,7 @@ export type Database = {
           end_at: string
           google_event_id: string
           id?: string
+          lead_id?: string | null
           meet_link?: string | null
           start_at: string
           synced_at?: string
@@ -150,6 +152,7 @@ export type Database = {
           end_at?: string
           google_event_id?: string
           id?: string
+          lead_id?: string | null
           meet_link?: string | null
           start_at?: string
           synced_at?: string
@@ -162,6 +165,13 @@ export type Database = {
             columns: ["deal_id"]
             isOneToOne: false
             referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_events_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
             referencedColumns: ["id"]
           },
         ]
