@@ -15,7 +15,12 @@ import { DataManagementCard } from "./_components/data-management-card";
 
 export const metadata = { title: "Settings — DealBridge" };
 
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ google?: string; google_error?: string; tab?: string }>;
+}) {
+  const sp = await searchParams;
   const supabase = await createClient();
   const user = await getAuthUser();
   if (!user) redirect("/auth/login");
@@ -46,7 +51,7 @@ export default async function SettingsPage() {
         <p className="text-muted-foreground text-sm mt-1">Configure your CRM workspace</p>
       </div>
 
-      <Tabs defaultValue="profile">
+      <Tabs defaultValue={sp.tab ?? "profile"}>
         <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
@@ -89,6 +94,8 @@ export default async function SettingsPage() {
             connections={(connections ?? []) as any}
             googleConfigured={Boolean(process.env.GOOGLE_CLIENT_ID)}
             slackConfigured={Boolean(process.env.SLACK_BOT_TOKEN)}
+            googleStatus={sp.google}
+            googleError={sp.google_error}
           />
         </TabsContent>
 

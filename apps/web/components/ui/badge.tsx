@@ -50,8 +50,18 @@ const LEAD_STATUS_CONFIG: Record<LeadStatus, { label: string; variant: BadgeProp
   "closed": { label: "Closed", variant: "success" },
 };
 
+function titleCase(value: string) {
+  return value.replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 export function LeadStatusBadge({ status }: { status: LeadStatus }) {
-  const { label, variant } = LEAD_STATUS_CONFIG[status];
+  // Fall back gracefully for any status not in the config (e.g. legacy values
+  // like "contacted"/"qualified"/"lost" left in the DB before the status
+  // migration was applied) instead of throwing and blanking the whole page.
+  const { label, variant } = LEAD_STATUS_CONFIG[status] ?? {
+    label: status ? titleCase(String(status)) : "Unknown",
+    variant: "gray" as const,
+  };
   return <Badge variant={variant}>{label}</Badge>;
 }
 
@@ -63,6 +73,9 @@ export function DealStageBadge({ stage }: { stage: DealStage }) {
     won: { label: "Won", variant: "success" },
     lost: { label: "Lost", variant: "destructive" },
   };
-  const { label, variant } = map[stage];
+  const { label, variant } = map[stage] ?? {
+    label: stage ? titleCase(String(stage)) : "Unknown",
+    variant: "gray" as const,
+  };
   return <Badge variant={variant}>{label}</Badge>;
 }
