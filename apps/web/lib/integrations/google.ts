@@ -1,14 +1,19 @@
 /**
- * Google OAuth 2.0 (Authorization Code flow) helpers.
+ * Google OAuth 2.0 + Calendar helpers.
  *
  * Dependency-free — plain `fetch` against Google's public endpoints, no SDK.
- * Used by the connect/callback route handlers to let a CRM user authorize
- * access to their Google Calendar (event creation + Meet links, later phase).
+ * Covers the OAuth connect/callback flow (authorize URL, code exchange,
+ * userinfo), token refresh, and Calendar event creation (with Meet links).
+ *
+ * Keep this module edge-safe: NO node imports (e.g. `token-crypto`). Callers
+ * that need to decrypt stored tokens do that in a server-only module and pass a
+ * plaintext access token in here.
  */
 
 const AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo";
+const CALENDAR_API = "https://www.googleapis.com/calendar/v3";
 
 /** CSRF state cookie shared by the connect + callback routes. Path-scoped to the flow. */
 export const OAUTH_STATE_COOKIE = "g_oauth_state";
@@ -103,4 +108,131 @@ export async function fetchGoogleUserInfo(accessToken: string): Promise<GoogleUs
     throw new Error(`Google userinfo request failed (${res.status})`);
   }
   return (await res.json()) as GoogleUserInfo;
+}
+
+export interface GoogleRefreshResponse {
+  access_token: string;
+  expires_in: number;
+  scope?: string;
+  token_type?: string;
+}
+
+/**
+ * Exchange a stored refresh token for a fresh access token.
+ *
+ * Google does NOT return a new refresh token here — the caller keeps the one it
+ * already has. A `400 invalid_grant` means the refresh token was revoked or
+ * expired: the caller should treat that as "needs reconnect".
+ */
+export async function refreshAccessToken(refreshToken: string): Promise<GoogleRefreshResponse> {
+  const res = await fetch(TOKEN_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_id: process.env.GOOGLE_CLIENT_ID!,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+      refresh_token: refreshToken,
+      grant_type: "refresh_token",
+    }),
+  });
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    console.error("[google-oauth] token refresh failed:", res.status, detail);
+    throw new Error("Google token refresh failed");
+  }
+
+  return (await res.json()) as GoogleRefreshResponse;
+}
+
+/** Error carrying the HTTP status from a Google API call so callers can branch on 401/403. */
+export class GoogleApiError extends Error {
+  constructor(
+    public status: number,
+    message: string
+  ) {
+    super(message);
+    this.name = "GoogleApiError";
+  }
+}
+
+export interface CreateCalendarEventParams {
+  title: string;
+  description?: string;
+  /** RFC3339 instant, e.g. "2026-07-22T10:00:00.000Z". */
+  startISO: string;
+  /** RFC3339 instant. */
+  endISO: string;
+  /** IANA time zone, e.g. "Asia/Kolkata" — controls how Google displays the event. */
+  timeZone: string;
+  /** Attendee emails; may be empty (organizer-only meeting). */
+  attendeeEmails: string[];
+  /** Idempotency key for the Meet conference creation. */
+  requestId: string;
+}
+
+export interface CreateCalendarEventResult {
+  id: string;
+  meetLink: string | null;
+  htmlLink: string | null;
+}
+
+/**
+ * Create an event with a Google Meet link on the token owner's PRIMARY calendar.
+ *
+ * `conferenceDataVersion=1` is what makes Google generate the Meet link; without
+ * it the `conferenceData.createRequest` is ignored. `sendUpdates=all` makes
+ * Google email the invite + Meet link to attendees.
+ */
+export async function createCalendarEvent(
+  accessToken: string,
+  params: CreateCalendarEventParams
+): Promise<CreateCalendarEventResult> {
+  const body: Record<string, unknown> = {
+    summary: params.title,
+    start: { dateTime: params.startISO, timeZone: params.timeZone },
+    end: { dateTime: params.endISO, timeZone: params.timeZone },
+    conferenceData: {
+      createRequest: {
+        requestId: params.requestId,
+        conferenceSolutionKey: { type: "hangoutsMeet" },
+      },
+    },
+  };
+  if (params.description) body.description = params.description;
+  if (params.attendeeEmails.length > 0) {
+    body.attendees = params.attendeeEmails.map((email) => ({ email }));
+  }
+
+  const res = await fetch(
+    `${CALENDAR_API}/calendars/primary/events?conferenceDataVersion=1&sendUpdates=all`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    }
+  );
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    console.error("[google-calendar] event creation failed:", res.status, detail);
+    throw new GoogleApiError(res.status, "Google Calendar event creation failed");
+  }
+
+  const event = (await res.json()) as {
+    id: string;
+    hangoutLink?: string;
+    htmlLink?: string;
+    conferenceData?: { entryPoints?: Array<{ entryPointType?: string; uri?: string }> };
+  };
+
+  const videoEntry = event.conferenceData?.entryPoints?.find(
+    (e) => e.entryPointType === "video"
+  );
+  const meetLink = event.hangoutLink ?? videoEntry?.uri ?? null;
+
+  return { id: event.id, meetLink, htmlLink: event.htmlLink ?? null };
 }
