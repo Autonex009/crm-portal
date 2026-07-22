@@ -1,6 +1,7 @@
 "use client";
 
-import { useTransition } from "react";
+import { useEffect, useRef, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { disconnectIntegration } from "@/lib/actions/settings";
@@ -18,7 +19,20 @@ interface IntegrationsCardProps {
   connections: Connection[];
   googleConfigured: boolean;
   slackConfigured: boolean;
+  /** Set by the OAuth callback redirect: "connected" on success. */
+  googleStatus?: string;
+  /** Set by the OAuth callback redirect: an error code on failure. */
+  googleError?: string;
 }
+
+const GOOGLE_ERROR_MESSAGES: Record<string, string> = {
+  access_denied: "You cancelled the Google connection.",
+  state_mismatch: "Security check failed, please try again.",
+  exchange_failed: "Couldn't connect Google, please try again.",
+  save_failed: "Couldn't connect Google, please try again.",
+  unauthorized: "Please sign in and try connecting again.",
+  not_configured: "Google isn't configured on this server.",
+};
 
 const PROVIDERS: Array<{ key: Provider; name: string; description: string; icon: typeof Calendar }> = [
   {
@@ -35,9 +49,36 @@ const PROVIDERS: Array<{ key: Provider; name: string; description: string; icon:
   },
 ];
 
-export function IntegrationsCard({ connections, googleConfigured, slackConfigured }: IntegrationsCardProps) {
+export function IntegrationsCard({
+  connections,
+  googleConfigured,
+  slackConfigured,
+  googleStatus,
+  googleError,
+}: IntegrationsCardProps) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const statusHandled = useRef(false);
   const configured: Record<Provider, boolean> = { google: googleConfigured, slack: slackConfigured };
+
+  // Surface the OAuth callback result once, then strip the query params so a
+  // refresh doesn't re-toast. The ref guards against React's double-invoke in dev.
+  useEffect(() => {
+    if (statusHandled.current) return;
+    if (!googleStatus && !googleError) return;
+    statusHandled.current = true;
+
+    if (googleStatus === "connected") {
+      toast({ title: "Google connected", variant: "success" });
+    } else if (googleError) {
+      toast({
+        title: "Google connection failed",
+        description: GOOGLE_ERROR_MESSAGES[googleError] ?? "Couldn't connect Google, please try again.",
+        variant: "destructive",
+      });
+    }
+    router.replace("/settings?tab=integrations");
+  }, [googleStatus, googleError, router]);
 
   function handleDisconnect(provider: Provider) {
     startTransition(async () => {
@@ -90,14 +131,20 @@ export function IntegrationsCard({ connections, googleConfigured, slackConfigure
                 ) : (
                   <>
                     <Badge variant="gray">Not connected</Badge>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={!isConfigured}
-                      title={isConfigured ? undefined : "Not configured on this server yet"}
-                    >
-                      Connect
-                    </Button>
+                    {isConfigured && key === "google" ? (
+                      <Button asChild variant="outline" size="sm">
+                        <a href="/api/integrations/google/connect">Connect</a>
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={!isConfigured}
+                        title={isConfigured ? undefined : "Not configured on this server yet"}
+                      >
+                        Connect
+                      </Button>
+                    )}
                   </>
                 )}
               </div>
