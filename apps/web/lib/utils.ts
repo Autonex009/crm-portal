@@ -29,3 +29,16 @@ export function formatDate(date: string | Date): string {
     day: "numeric",
   }).format(new Date(date));
 }
+
+/** Human-friendly label for a `profiles.role` value. */
+const ROLE_LABELS: Record<string, string> = {
+  owner: "Owner",
+  admin: "Admin",
+  sales: "Sales Representative",
+  account_manager: "Account Manager",
+  client: "Client",
+};
+
+export function roleLabel(role: string): string {
+  return ROLE_LABELS[role] ?? role.replace(/_/g, " ");
+}

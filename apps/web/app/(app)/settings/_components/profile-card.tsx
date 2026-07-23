@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { updateProfile } from "@/lib/actions/settings";
 import { toast } from "@/components/ui/use-toast";
-import { initials } from "@/lib/utils";
+import { initials, roleLabel } from "@/lib/utils";
 
 interface ProfileCardProps {
   email: string;
@@ -73,8 +73,8 @@ export function ProfileCard({ email, fullName, avatarUrl, role }: ProfileCardPro
         <div className="space-y-1.5">
           <Label>Role</Label>
           <div>
-            <Badge variant="secondary" className="capitalize font-normal">
-              {role.replace("_", " ")}
+            <Badge variant="secondary" className="font-normal">
+              {roleLabel(role)}
             </Badge>
           </div>
         </div>
