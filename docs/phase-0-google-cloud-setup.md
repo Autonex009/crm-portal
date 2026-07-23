@@ -1,0 +1,235 @@
+# Phase 0 — Google Cloud setup (Schedule Meeting feature)
+
+This is the **one-time, click-through setup** that unblocks the Google Calendar
+integration. It produces three values — `GOOGLE_CLIENT_ID`,
+`GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI` — that the app needs to connect a
+user's Google account and create calendar events with Meet links.
+
+None of this can be done from code; it's all in the Google Cloud Console.
+Budget ~20 minutes.
+
+> Looking for **Google _sign-in_** (logging users into DealBridge with their
+> Google account)? That's a separate setup — see
+> [`google-signin-setup.md`](./google-signin-setup.md). This doc is only about the
+> Calendar/Meet integration.
+
+> **You do not need a GitHub secret for these.** The Google credentials are used
+> by the **web app at runtime**, not by CI. They go in `.env.local` (local) and
+> **Railway variables** (production). GitHub Actions never touches them.
+
+---
+
+## 💰 Keep it free: never link a billing account
+
+This whole feature costs **$0**. The Google Calendar API (event creation, Meet
+links, attendee invites) is **free** and does **not** require a billing account.
+
+The one rule that guarantees no charges: **do not link/enable a billing account
+on the project.** With no billing account attached, Google *cannot* charge you —
+the worst case is an API rate-limit, never a bill.
+
+- ✅ Enable only the **Google Calendar API** (free).
+- ❌ If Google prompts "Enable billing" / "Link a billing account", **skip it** —
+  Calendar + OAuth don't need it.
+- ❌ Don't enable any API labelled "requires billing".
+
+(You already pay for Google Workspace — that's an existing cost and is what makes
+the free Internal setup possible. Nothing new to buy.)
+
+---
+
+## ⚠️ Decision first: Internal vs External user type
+
+This is the most important choice and it's hard to change later.
+
+Your account is on **`autonexai360.com`, a Google Workspace domain**, so choose:
+
+### ✅ Internal (recommended for you)
+- Only users **inside your Workspace org** can connect their Google account.
+- **No Google verification/review required** — you can use it immediately.
+- **No 7-day refresh-token expiry** (the External "Testing" mode expires refresh
+  tokens weekly, which would silently break the integration for every user).
+- No "test users" list to maintain.
+
+### 🔑 "But we meet with clients outside the org!" — you still use Internal
+
+Internal vs External controls **who can connect their Google account to the CRM**
+(the *organizer*), **not who you can invite to a meeting** (the *attendees*).
+
+| Role | Who | Limited by user type? |
+|------|-----|-----------------------|
+| **Organizer** — connects their Google account; the CRM creates events on *their* calendar | Your team (org members) | ✅ Yes — Internal = org members only |
+| **Attendee** — invited to the meeting, gets the email + Meet link, can join | Anyone, any email (your clients) | ❌ No — unrestricted |
+
+So with **Internal**, your sales team connects their calendars and can still
+invite **any external client** to a meeting — Google emails the invite and Meet
+link, and external guests join normally. Inviting outside clients is an
+*attendee* action, which Internal does not restrict.
+
+You would only need **External** if external clients had to **log into the CRM
+and connect their own Google Calendar as organizers** — which is not this
+product's workflow. Clients are guests, not CRM users.
+
+External also costs real time: Google **OAuth verification** (privacy policy,
+app-domain verification, security review, sometimes a recorded demo — often
+weeks), plus refresh tokens that **expire every 7 days** while in "Testing" mode,
+silently breaking the integration for everyone. Don't take that on to solve a
+problem you don't have.
+
+Requirement: you must create the project **under the `autonexai360.com`
+organization**, and the person doing this setup needs Workspace admin rights (or
+help from whoever administers your Google Workspace) to see the "Internal" option.
+
+---
+
+## Step 1 — Use the DealBridge project
+
+There's already a project named **`DealBridge`** under the `autonexai360.com`
+organization — use it (no need to create a new one).
+
+1. Go to https://console.cloud.google.com/
+2. Make sure the org selector (top bar) shows **`autonexai360.com`**.
+3. Open the project dropdown → select **`DealBridge`** as the active project.
+4. Confirm no billing account is linked (the org's Resources list shows `—` under
+   **Charges** for it). Leave it that way — see the "Keep it free" note above.
+
+> Prefer a dedicated project instead? You can create a new one under the same org
+> (project dropdown → **New Project**, Organization = `autonexai360.com`). Either
+> works and both are free. The rest of this guide assumes **DealBridge**.
+
+---
+
+## Step 2 — Enable the Google Calendar API
+
+1. Left nav → **APIs & Services → Library**.
+2. Search **"Google Calendar API"** → open it → **Enable**.
+
+> You do **not** need to enable a separate "Meet" API. Google Meet links are
+> generated by the Calendar API itself (via `conferenceData`), so enabling
+> Calendar is enough.
+
+---
+
+## Step 3 — Configure the OAuth consent screen
+
+The console has been reorganizing this area (sometimes labeled **"OAuth consent
+screen"** under APIs & Services, sometimes **"Google Auth Platform → Branding"**).
+Either path leads to the same settings.
+
+1. **APIs & Services → OAuth consent screen** (or **Google Auth Platform**).
+2. **User type → Internal** (per the decision above) → Create.
+3. Fill the app info:
+   - App name: `CRM Portal`
+   - User support email: your Workspace email
+   - Developer contact email: your Workspace email
+   - (Logo, app domain, etc. are optional for Internal.)
+4. Save and continue.
+
+---
+
+## Step 4 — Add the scopes
+
+Still in the consent-screen flow, add these scopes (Add or remove scopes →
+paste/search):
+
+| Scope | Why |
+|-------|-----|
+| `https://www.googleapis.com/auth/calendar.events` | Create & manage calendar events (and the Meet link + attendee invites) |
+| `openid` | Standard OpenID Connect |
+| `https://www.googleapis.com/auth/userinfo.email` | Identify which Google account was connected (stored as `provider_account_id`) |
+
+> Keep scopes **minimal**. `calendar.events` lets us create/manage events we own
+> without full read access to the user's entire calendar. Don't add
+> `calendar` (full access) unless a later phase genuinely needs it.
+
+Save and continue. (For Internal apps there's no verification step.)
+
+---
+
+## Step 5 — Create the OAuth 2.0 Client ID
+
+1. **APIs & Services → Credentials → Create Credentials → OAuth client ID**.
+2. Application type: **Web application**.
+3. Name: `crm-portal-web`.
+4. **Authorized redirect URIs** — add **both** of these exactly (trailing slashes
+   matter, so no trailing slash):
+
+   ```
+   http://localhost:3000/api/integrations/google/callback
+   https://YOUR-PRODUCTION-DOMAIN/api/integrations/google/callback
+   ```
+
+   - The local one matches the default `GOOGLE_REDIRECT_URI` in `.env.example`.
+   - For the production one, use your Railway app's public domain. Find it in the
+     Railway dashboard → `crm-portal` service → **Settings → Domains**, or it's
+     the host in your production `NEXT_PUBLIC_APP_URL`.
+   - You can add more later (e.g. a preview domain) — just come back here.
+
+5. **Create.** A dialog shows your **Client ID** and **Client Secret**. Copy both
+   now (you can retrieve them again from the Credentials page).
+
+> **Authorized JavaScript origins** are not required — our flow is a server-side
+> redirect (Authorization Code flow), not a browser-side token flow.
+
+---
+
+## Step 6 — Put the credentials where the app reads them
+
+### Local development — `.env.local` (repo root, gitignored)
+Add:
+
+```bash
+GOOGLE_CLIENT_ID=<your client id>
+GOOGLE_CLIENT_SECRET=<your client secret>
+GOOGLE_REDIRECT_URI=http://localhost:3000/api/integrations/google/callback
+```
+
+(`GOOGLE_REDIRECT_URI` may already be present — just confirm it matches.)
+
+### Production — Railway variables
+Railway dashboard → `crm-portal` service → **Variables** → add:
+
+```
+GOOGLE_CLIENT_ID       = <your client id>
+GOOGLE_CLIENT_SECRET   = <your client secret>
+GOOGLE_REDIRECT_URI    = https://YOUR-PRODUCTION-DOMAIN/api/integrations/google/callback
+```
+
+> The production `GOOGLE_REDIRECT_URI` **must exactly match** one of the
+> Authorized redirect URIs from Step 5, or Google returns `redirect_uri_mismatch`.
+
+### Do NOT
+- ❌ Don't put these in `.env.development` (it's committed to git).
+- ❌ Don't add them as GitHub Actions secrets — CI doesn't use them.
+- ❌ Don't commit the client secret anywhere tracked by git.
+
+---
+
+## Step 7 — Sanity check
+
+- [ ] Project is under the `autonexai360.com` org.
+- [ ] Google Calendar API shows **Enabled**.
+- [ ] Consent screen user type is **Internal**.
+- [ ] Scopes include `calendar.events`, `openid`, `userinfo.email`.
+- [ ] OAuth client has **both** redirect URIs (local + production), no trailing slash.
+- [ ] Client ID + Secret are in `.env.local` and Railway (not in git).
+
+Once these are done, **Phase 1** (the OAuth connect/callback routes + token
+encryption + wiring the Settings "Connect" button) can be built and tested
+locally against `http://localhost:3000`.
+
+---
+
+## Notes / gotchas
+
+- **`prompt=consent` + `access_type=offline`:** Phase 1's connect URL will request
+  these so Google returns a **refresh token** (needed to keep creating events
+  after the ~1-hour access token expires). Google only returns a refresh token on
+  the first consent unless `prompt=consent` forces it — so this matters.
+- **Meet links** appear automatically when the event is created with
+  `conferenceDataVersion=1`; no extra Google config here.
+- **Attendee invite emails** are sent by Google Calendar (`sendUpdates=all`), not
+  by our app — so no email provider is needed for the core flow.
+- **Publishing status:** Internal apps don't need publishing/verification. If you
+  later switch to External to support non-org attendees connecting their own
+  calendars, plan for Google's verification review.
