@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { LogOut, User } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { roleLabel } from "@/lib/utils";
 
 export function Topbar({ fullName, role }: { fullName: string; role: string }) {
   const router = useRouter();
@@ -24,7 +25,7 @@ export function Topbar({ fullName, role }: { fullName: string; role: string }) {
         <div className="flex items-center gap-2 text-sm">
           <User className="h-4 w-4 text-muted-foreground" />
           <span className="font-medium">{fullName}</span>
-          <span className="capitalize text-muted-foreground">({role})</span>
+          <span className="text-muted-foreground">({roleLabel(role)})</span>
         </div>
         <button
           onClick={signOut}

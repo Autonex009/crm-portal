@@ -32,18 +32,33 @@ export async function updateProfile(formData: FormData): Promise<ActionResult> {
   return { success: true, data: undefined };
 }
 
-const UserRole = z.enum(["admin", "sales", "account_manager", "client"]);
+const UserRole = z.enum(["owner", "admin", "sales", "account_manager", "client"]);
+
+// Roles only an owner may assign or take away. Admins manage everyone else.
+const PRIVILEGED_ROLES = new Set<string>(["owner", "admin"]);
 
 export async function updateUserRole(id: string, role: z.infer<typeof UserRole>): Promise<ActionResult> {
   const supabase = await createClient();
   const user = await getAuthUser();
   if (!user) return { success: false, error: "Unauthorized" };
 
-  const { data: actor } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
-  if (actor?.role !== "admin") return { success: false, error: "Only admins can change roles" };
-
   const parsed = UserRole.safeParse(role);
   if (!parsed.success) return { success: false, error: "Invalid role" };
+
+  const { data: actor } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+  const actorRole = actor?.role;
+  if (actorRole !== "admin" && actorRole !== "owner") {
+    return { success: false, error: "Only admins can change roles" };
+  }
+
+  const { data: target } = await supabase.from("profiles").select("role").eq("id", id).maybeSingle();
+  if (!target) return { success: false, error: "User not found" };
+
+  // Only the owner can create/remove admins or owners, or change an existing one.
+  const touchesPrivileged = PRIVILEGED_ROLES.has(parsed.data) || PRIVILEGED_ROLES.has(target.role);
+  if (touchesPrivileged && actorRole !== "owner") {
+    return { success: false, error: "Only the owner can assign or remove the owner and admin roles." };
+  }
 
   const { error } = await supabase.from("profiles").update({ role: parsed.data }).eq("id", id);
   if (error) return { success: false, error: error.message };

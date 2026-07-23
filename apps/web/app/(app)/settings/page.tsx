@@ -86,7 +86,11 @@ export default async function SettingsPage({
         </TabsContent>
 
         <TabsContent value="team">
-          <TeamCard members={members ?? []} currentUserId={user.id} />
+          <TeamCard
+            members={members ?? []}
+            currentUserId={user.id}
+            currentUserRole={profile?.role ?? "sales"}
+          />
         </TabsContent>
 
         <TabsContent value="integrations">
