@@ -65,10 +65,12 @@ function KeyValueRow({ label, value }: { label: string; value: React.ReactNode }
 
 function FinancialSummary({
   subtotal,
+  taxRate,
   taxAmount,
   grandTotal,
 }: {
   subtotal: number;
+  taxRate: number;
   taxAmount: number;
   grandTotal: number;
 }) {
@@ -83,7 +85,7 @@ function FinancialSummary({
           <span className="font-medium text-slate-50">{formatQuoteCurrency(subtotal)}</span>
         </div>
         <div className="flex items-center justify-between text-sm text-slate-300">
-          <span>Tax Amount (8.5%)</span>
+          <span>GST Amount ({taxRate}%)</span>
           <span className="font-medium text-slate-50">{formatQuoteCurrency(taxAmount)}</span>
         </div>
         <div className="flex items-center justify-between border-t border-slate-800 pt-3 text-base font-semibold">
@@ -201,7 +203,7 @@ export function QuoteWorkbench({
               <div className="flex flex-wrap gap-3">
                 <Button
                   variant="outline"
-                  className="border-white/15 bg-white text-slate-950 hover:bg-slate-100"
+                  className="border-white/15 bg-white text-slate-950 hover:bg-slate-200 hover:text-slate-950"
                   onClick={handleEditDetails}
                   disabled={isLocked}
                 >
@@ -210,22 +212,22 @@ export function QuoteWorkbench({
                 </Button>
                 <Button
                   variant="outline"
-                  className="border-white/15 bg-transparent text-white hover:bg-white/10"
+                  className="border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white"
                   onClick={handlePrint}
                 >
                   <Printer className="h-4 w-4" />
-                  Print / PDF
+                  Print / Save as PDF
                 </Button>
                 <Button
                   variant="outline"
-                  className="border-white/15 bg-transparent text-white hover:bg-white/10"
+                  className="border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white"
                   onClick={handleEmailClient}
                 >
                   <Mail className="h-4 w-4" />
                   Email Client
                 </Button>
                 <Button
-                  className="bg-emerald-400 text-slate-950 hover:bg-emerald-300"
+                  className="bg-emerald-400 text-slate-950 hover:bg-emerald-300 hover:text-slate-950"
                   onClick={() => setConvertDialogOpen(true)}
                   disabled={isLocked}
                 >
@@ -387,6 +389,7 @@ export function QuoteWorkbench({
 
             <FinancialSummary
               subtotal={financialSummary.subtotal}
+              taxRate={financialSummary.taxRate}
               taxAmount={financialSummary.taxAmount}
               grandTotal={financialSummary.grandTotal}
             />
