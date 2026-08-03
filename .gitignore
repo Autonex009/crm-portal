@@ -33,5 +33,7 @@ Thumbs.db
 .idea/
 *.swp
 
-# Supabase
-supabase/.temp/
+# Documents & Templates
+PO - template.docx
+*.docx
+

@@ -118,7 +118,8 @@ export function QuoteInputWizard() {
   );
 
   const subtotal = roundCurrency(costLines.reduce((sum, line) => sum + line.total, 0));
-  const taxAmount = roundCurrency(subtotal * TAX_RATE);
+  const taxRate = values?.taxRate ?? 18;
+  const taxAmount = roundCurrency(subtotal * (taxRate / 100));
   const grandTotal = roundCurrency(subtotal + taxAmount);
 
   function selectCategory(next: ProductCategory) {
@@ -699,7 +700,20 @@ export function QuoteInputWizard() {
               <span className="font-medium text-foreground">{formatQuoteCurrency(subtotal)}</span>
             </div>
             <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>Tax (8.5%)</span>
+              <span className="flex items-center gap-1.5">
+                GST Rate (%)
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  className="h-7 w-16 text-right text-xs"
+                  value={values?.taxRate ?? 18}
+                  onChange={(event) => {
+                    const val = Number(event.target.value);
+                    setValues((current) => (current ? { ...current, taxRate: Number.isFinite(val) ? val : 0 } : current));
+                  }}
+                />
+              </span>
               <span className="font-medium text-foreground">{formatQuoteCurrency(taxAmount)}</span>
             </div>
             <div className="flex items-center justify-between border-t pt-2 text-sm font-semibold">
