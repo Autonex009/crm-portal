@@ -273,6 +273,7 @@ export function LeadsClient({
                     <TableHead>Contact</TableHead>
                     <TableHead>Interest</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Date</TableHead>
                     <TableHead>Next Follow-up</TableHead>
                     <TableHead className="w-12" />
                   </TableRow>
@@ -316,6 +317,9 @@ export function LeadsClient({
                       </TableCell>
                       <TableCell>
                         <LeadStatusBadge status={lead.status} />
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {lead.created_at ? formatDate(lead.created_at) : "—"}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {lead.next_follow_up_date ? formatDate(lead.next_follow_up_date) : "—"}
@@ -406,6 +410,7 @@ export function LeadsClient({
                     <TableHead>Contact</TableHead>
                     <TableHead>Interest</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Date</TableHead>
                     <TableHead>Next Follow-up</TableHead>
                     <TableHead className="w-12" />
                   </TableRow>
@@ -439,6 +444,9 @@ export function LeadsClient({
                       </TableCell>
                       <TableCell>
                         <LeadStatusBadge status={lead.status} />
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {lead.created_at ? formatDate(lead.created_at) : "—"}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {lead.next_follow_up_date ? formatDate(lead.next_follow_up_date) : "—"}
