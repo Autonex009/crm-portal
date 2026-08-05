@@ -36,6 +36,8 @@ import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import { QUOTE_STATUS_STEPS, type QuoteRecord, type QuoteStatus } from "./quote-module-data";
 import { formatQuoteCurrency, getStatusStepIndex, useQuoteBuilder } from "./use-quote-builder";
+import { useInvoicesStore } from "@/app/(app)/invoices/_components/invoices-store";
+import type { InvoiceRecord, InvoiceLineItem } from "@/app/(app)/invoices/_components/invoice-types";
 
 function getStatusTone(status: QuoteStatus): "gray" | "info" | "success" | "secondary" | "outline" | "destructive" {
   switch (status) {
@@ -133,13 +135,78 @@ export function QuoteWorkbench({
   }
 
   function handleConvertToInvoice() {
+    const invNumber = `INV/${quote.quoteNumber.replace("Q-", "VGLTMX/")}/2026`;
+    const todayStr = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+
+    const invoiceItems: InvoiceLineItem[] = costLines.map((line, idx) => {
+      const taxable = line.total;
+      const cgstAmt = Math.round(taxable * 0.09);
+      const sgstAmt = Math.round(taxable * 0.09);
+      return {
+        srNo: idx + 1,
+        description: line.typeOfCost,
+        hsnSac: "998314/998316",
+        qty: line.qty,
+        unitPrice: line.finalPrice,
+        taxableValue: taxable,
+        cgstRate: 9,
+        cgstAmount: cgstAmt,
+        sgstRate: 9,
+        sgstAmount: sgstAmt,
+        igstRate: 0,
+        igstAmount: 0,
+        totalAmount: taxable + cgstAmt + sgstAmt,
+      };
+    });
+
+    const totalBeforeTax = financialSummary.subtotal;
+    const cgstTotal = Math.round(totalBeforeTax * 0.09);
+    const sgstTotal = Math.round(totalBeforeTax * 0.09);
+    const taxTotal = cgstTotal + sgstTotal;
+    const grandTotal = totalBeforeTax + taxTotal;
+
+    const newInvoice: InvoiceRecord = {
+      id: `inv-${Date.now()}`,
+      invoiceNumber: invNumber,
+      invoiceDate: todayStr,
+      quoteNumber: quote.quoteNumber,
+      issuerName: "Autonex AI 360 Private Limited",
+      issuerAddress: "908, Lodha Supremus, Saki Vihar Road, Powai, Maharashtra, India, 400072",
+      issuerContact: "9930769905",
+      issuerEmail: "nikhilg@autonexai360.com",
+      issuerGSTIN: "27ABDCA3903H1ZX",
+      issuerPAN: "ABDCA3903H",
+      clientName: quote.account?.label || quote.categoryTemplate.reference || "Client Company",
+      clientAddress: "D-13 - R.D.Aga Road, MIDC Industrial Area, Chinchwad-Pune-411019, MH-India",
+      clientContact: quote.createdBy.name,
+      clientGSTIN: "27AAACT3910D1ZS",
+      items: invoiceItems,
+      totalBeforeTax,
+      cgstTotal,
+      sgstTotal,
+      igstTotal: 0,
+      taxTotal,
+      roundOff: 0,
+      grandTotal,
+      bankName: "HDFC Bank",
+      bankBranch: "Sharanpur Road Branch",
+      accountNumber: "50200113611183",
+      ifscCode: "HDFC0001246",
+      authorisedSignatory: "NIKHIL SUNIL GAWADE",
+      status: "Pending",
+    };
+
+    useInvoicesStore.getState().addInvoice(newInvoice);
     convertToInvoice();
     setConvertDialogOpen(false);
+
     toast({
-      title: "Quote converted to invoice",
-      description: "The record is now closed and locked for historical audit integrity.",
+      title: "GST Tax Invoice generated!",
+      description: `Invoice ${invNumber} created. The quote is now closed and locked for audit.`,
       variant: "success",
     });
+
+    router.push(`/invoices/${encodeURIComponent(invNumber)}/print`);
   }
 
   return (
