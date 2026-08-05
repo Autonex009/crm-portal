@@ -44,11 +44,11 @@ interface Company { id: string; name: string }
 interface Contact { id: string; first_name: string; last_name: string }
 
 const STAGES: { id: DealStage; label: string; colorClass: string; dotColor: string }[] = [
-  { id: "prospect",    label: "Prospect",    colorClass: "bg-slate-50 border-slate-200",  dotColor: "bg-slate-400" },
-  { id: "proposal",   label: "Proposal",    colorClass: "bg-blue-50 border-blue-200",    dotColor: "bg-blue-500" },
-  { id: "negotiation",label: "Negotiation", colorClass: "bg-amber-50 border-amber-200",  dotColor: "bg-amber-500" },
-  { id: "won",        label: "Won",         colorClass: "bg-emerald-50 border-emerald-200", dotColor: "bg-emerald-500" },
-  { id: "lost",       label: "Lost",        colorClass: "bg-red-50 border-red-200",      dotColor: "bg-red-400" },
+  { id: "prospect",    label: "Prospect",    colorClass: "bg-muted/40 border-border",  dotColor: "bg-slate-400" },
+  { id: "proposal",   label: "Proposal",    colorClass: "bg-blue-500/10 border-blue-500/20",    dotColor: "bg-blue-500" },
+  { id: "negotiation",label: "Negotiation", colorClass: "bg-amber-500/10 border-amber-500/20",  dotColor: "bg-amber-500" },
+  { id: "won",        label: "Won",         colorClass: "bg-emerald-500/10 border-emerald-500/20", dotColor: "bg-emerald-500" },
+  { id: "lost",       label: "Lost",        colorClass: "bg-red-500/10 border-red-500/20",      dotColor: "bg-red-400" },
 ];
 
 function KanbanColumn({
@@ -69,13 +69,13 @@ function KanbanColumn({
     <div className={cn("flex-shrink-0 w-72 flex flex-col rounded-xl border", stage.colorClass)}>
       <div className="flex items-center gap-2 p-3 pb-2">
         <div className={cn("h-2 w-2 rounded-full", stage.dotColor)} />
-        <h3 className="font-semibold text-sm flex-1 text-slate-900">{stage.label}</h3>
-        <span className="text-xs font-medium bg-white text-slate-700 rounded-full px-2 py-0.5 border border-slate-200">
+        <h3 className="font-semibold text-sm flex-1 text-foreground">{stage.label}</h3>
+        <span className="text-xs font-medium bg-card text-foreground rounded-full px-2 py-0.5 border border-border shadow-xs">
           {deals.length}
         </span>
       </div>
       <div className="px-3 pb-2">
-        <p className="text-xs text-slate-500 font-medium">{formatCurrency(total)}</p>
+        <p className="text-xs text-muted-foreground font-medium">{formatCurrency(total)}</p>
       </div>
 
       <SortableContext items={deals.map((d) => d.id)} strategy={verticalListSortingStrategy}>
@@ -83,7 +83,7 @@ function KanbanColumn({
           ref={setNodeRef}
           className={cn(
             "flex-1 px-2 pb-2 space-y-2 min-h-32 rounded-lg transition-colors",
-            isOver && "bg-black/5"
+            isOver && "bg-accent/40"
           )}
         >
           {deals.map((deal) => (
@@ -98,7 +98,7 @@ function KanbanColumn({
           contacts={contacts}
           defaultStage={stage.id}
           trigger={
-            <button className="w-full flex items-center gap-1.5 px-2 py-1.5 text-xs text-slate-500 hover:text-slate-900 hover:bg-black/5 rounded-md transition-colors">
+            <button className="w-full flex items-center gap-1.5 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-colors">
               <Plus className="h-3.5 w-3.5" />
               Add deal
             </button>
@@ -124,7 +124,7 @@ function SortableDealCard({ deal, overlay }: { deal: DealCard; overlay?: boolean
       ref={setNodeRef}
       style={style}
       className={cn(
-        "group bg-white rounded-lg border border-slate-200 shadow-sm p-3 cursor-grab active:cursor-grabbing",
+        "group bg-card rounded-lg border border-border shadow-xs p-3 cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors",
         isDragging && !overlay && "opacity-40 ring-2 ring-primary/20",
         overlay && "rotate-1 shadow-xl"
       )}
@@ -137,31 +137,31 @@ function SortableDealCard({ deal, overlay }: { deal: DealCard; overlay?: boolean
         onClick={(e) => e.stopPropagation()}
         draggable={false}
       >
-        <p className="font-medium text-sm leading-tight mb-2 text-slate-900 group-hover:text-primary transition-colors">
+        <p className="font-medium text-sm leading-tight mb-2 text-foreground group-hover:text-primary transition-colors">
           {deal.title}
         </p>
       </Link>
 
       {deal.company_name && (
-        <p className="text-xs text-slate-500 mb-1">{deal.company_name}</p>
+        <p className="text-xs text-muted-foreground mb-1">{deal.company_name}</p>
       )}
 
       {deal.product_use_case && (
-        <p className="text-xs text-slate-400 mb-2 truncate">{deal.product_use_case}</p>
+        <p className="text-xs text-muted-foreground/80 mb-2 truncate">{deal.product_use_case}</p>
       )}
 
       <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold text-slate-900">
+        <span className="text-sm font-semibold text-foreground">
           {formatCurrency(deal.amount)}
         </span>
         <div className="flex items-center gap-2">
           {deal.probability != null && (
-            <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
+            <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
               {deal.probability}%
             </span>
           )}
           {deal.expected_close_date && (
-            <div className="flex items-center gap-1 text-xs text-slate-500">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Calendar className="h-3 w-3" />
               {formatDate(deal.expected_close_date)}
             </div>
