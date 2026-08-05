@@ -269,36 +269,36 @@ export function QuoteWorkbench({
 
               <div className="flex flex-wrap gap-3">
                 <Button
-                  variant="outline"
-                  className="border-white/15 bg-white text-slate-950 hover:bg-slate-200 hover:text-slate-950"
+                  variant="secondary"
+                  className="bg-white text-slate-900 shadow-sm hover:bg-slate-100 hover:text-slate-900 font-semibold"
                   onClick={handleEditDetails}
                   disabled={isLocked}
                 >
-                  <Pencil className="h-4 w-4" />
+                  <Pencil className="h-4 w-4 text-slate-900" />
                   Edit Details
                 </Button>
                 <Button
                   variant="outline"
-                  className="border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white"
+                  className="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
                   onClick={handlePrint}
                 >
-                  <Printer className="h-4 w-4" />
+                  <Printer className="h-4 w-4 text-white" />
                   Print / Save as PDF
                 </Button>
                 <Button
                   variant="outline"
-                  className="border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white"
+                  className="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
                   onClick={handleEmailClient}
                 >
-                  <Mail className="h-4 w-4" />
+                  <Mail className="h-4 w-4 text-white" />
                   Email Client
                 </Button>
                 <Button
-                  className="bg-emerald-400 text-slate-950 hover:bg-emerald-300 hover:text-slate-950"
+                  className="bg-emerald-500 text-white hover:bg-emerald-400 font-semibold shadow-sm"
                   onClick={() => setConvertDialogOpen(true)}
                   disabled={isLocked}
                 >
-                  <Receipt className="h-4 w-4" />
+                  <Receipt className="h-4 w-4 text-white" />
                   Convert to Invoice
                 </Button>
               </div>

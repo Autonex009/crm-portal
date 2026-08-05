@@ -28,10 +28,10 @@ export default function InvoicesPage() {
   if (!hydrated) {
     return (
       <div className="space-y-6 p-6">
-        <div className="h-8 w-48 bg-slate-200 animate-pulse rounded-md" />
+        <div className="h-8 w-48 bg-muted animate-pulse rounded-md" />
         <div className="grid gap-4 md:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-28 bg-slate-100 animate-pulse rounded-xl" />
+            <div key={i} className="h-28 bg-muted/60 animate-pulse rounded-xl" />
           ))}
         </div>
       </div>
@@ -48,8 +48,8 @@ export default function InvoicesPage() {
       {/* Header Banner */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2 text-slate-900">
-            <Receipt className="h-6 w-6 text-blue-600" />
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2 text-foreground">
+            <Receipt className="h-6 w-6 text-primary" />
             Invoices & GST Ledger
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
@@ -60,47 +60,47 @@ export default function InvoicesPage() {
 
       {/* Metrics Row */}
       <div className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-xl border border-blue-100 bg-blue-50/40 p-5 shadow-xs">
+        <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 p-5 shadow-xs">
           <div className="flex items-center justify-between pb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-blue-800">
+            <span className="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">
               Total Invoiced
             </span>
-            <Receipt className="h-4 w-4 text-blue-600" />
+            <Receipt className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           </div>
-          <div className="text-2xl font-bold text-slate-900 mt-1">{formatINR(totalInvoiced)}</div>
+          <div className="text-2xl font-bold text-foreground mt-1">{formatINR(totalInvoiced)}</div>
           <p className="text-xs text-muted-foreground mt-1">Gross value incl. GST</p>
         </div>
 
-        <div className="rounded-xl border border-emerald-100 bg-emerald-50/40 p-5 shadow-xs">
+        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-5 shadow-xs">
           <div className="flex items-center justify-between pb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-800">
+            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
               Taxable Revenue
             </span>
-            <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
+            <FileSpreadsheet className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           </div>
-          <div className="text-2xl font-bold text-slate-900 mt-1">{formatINR(totalTaxable)}</div>
+          <div className="text-2xl font-bold text-foreground mt-1">{formatINR(totalTaxable)}</div>
           <p className="text-xs text-muted-foreground mt-1">Before tax value</p>
         </div>
 
-        <div className="rounded-xl border border-amber-100 bg-amber-50/40 p-5 shadow-xs">
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-5 shadow-xs">
           <div className="flex items-center justify-between pb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-amber-800">
+            <span className="text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
               GST Output Tax
             </span>
-            <Clock className="h-4 w-4 text-amber-600" />
+            <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
           </div>
-          <div className="text-2xl font-bold text-slate-900 mt-1">{formatINR(totalGST)}</div>
+          <div className="text-2xl font-bold text-foreground mt-1">{formatINR(totalGST)}</div>
           <p className="text-xs text-muted-foreground mt-1">CGST + SGST + IGST</p>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-card p-5 shadow-xs">
+        <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
           <div className="flex items-center justify-between pb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-600">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Settled Invoices
             </span>
-            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+            <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
           </div>
-          <div className="text-2xl font-bold text-slate-900 mt-1">
+          <div className="text-2xl font-bold text-foreground mt-1">
             {paidInvoicesCount} / {invoices.length}
           </div>
           <p className="text-xs text-muted-foreground mt-1">Paid ledgers</p>
@@ -108,17 +108,17 @@ export default function InvoicesPage() {
       </div>
 
       {/* Invoices List Table */}
-      <div className="rounded-xl border border-slate-200 bg-card shadow-xs">
-        <div className="border-b bg-slate-50/50 py-4 px-6">
+      <div className="rounded-xl border border-border bg-card shadow-xs">
+        <div className="border-b bg-muted/40 py-4 px-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold text-slate-900">Tax Invoices Directory</h2>
+            <h2 className="text-base font-semibold text-foreground">Tax Invoices Directory</h2>
             <span className="text-xs text-muted-foreground">{invoices.length} Records</span>
           </div>
         </div>
         <div className="p-0">
           <Table>
             <TableHeader>
-              <TableRow className="bg-slate-50/80">
+              <TableRow className="bg-muted/50">
                 <TableHead className="w-[180px] font-semibold">Invoice Number</TableHead>
                 <TableHead className="font-semibold">Client Company</TableHead>
                 <TableHead className="font-semibold">Invoice Date</TableHead>
@@ -131,25 +131,25 @@ export default function InvoicesPage() {
             </TableHeader>
             <TableBody>
               {invoices.map((inv) => (
-                <TableRow key={inv.id} className="hover:bg-slate-50/60">
-                  <TableCell className="font-mono font-bold text-slate-900">
+                <TableRow key={inv.id} className="hover:bg-muted/50 transition-colors">
+                  <TableCell className="font-mono font-bold text-foreground">
                     <Link
                       href={`/invoices/${encodeURIComponent(inv.invoiceNumber)}/print`}
-                      className="hover:text-blue-600 hover:underline flex items-center gap-1.5"
+                      className="hover:text-primary hover:underline flex items-center gap-1.5"
                     >
                       {inv.invoiceNumber}
                       <ArrowUpRight className="h-3.5 w-3.5 opacity-50" />
                     </Link>
                   </TableCell>
-                  <TableCell className="font-semibold text-slate-800">{inv.clientName}</TableCell>
-                  <TableCell className="text-slate-600 text-sm">{inv.invoiceDate}</TableCell>
-                  <TableCell className="text-right font-mono text-sm">
+                  <TableCell className="font-semibold text-foreground">{inv.clientName}</TableCell>
+                  <TableCell className="text-muted-foreground text-sm">{inv.invoiceDate}</TableCell>
+                  <TableCell className="text-right font-mono text-sm text-foreground">
                     {formatINR(inv.totalBeforeTax)}
                   </TableCell>
-                  <TableCell className="text-right font-mono text-sm text-amber-700">
+                  <TableCell className="text-right font-mono text-sm text-amber-600 dark:text-amber-400">
                     {formatINR(inv.taxTotal)}
                   </TableCell>
-                  <TableCell className="text-right font-mono font-bold text-slate-900 text-sm">
+                  <TableCell className="text-right font-mono font-bold text-foreground text-sm">
                     {formatINR(inv.grandTotal)}
                   </TableCell>
                   <TableCell className="text-center">
@@ -174,7 +174,7 @@ export default function InvoicesPage() {
                   </TableCell>
                   <TableCell className="text-right pr-6">
                     <Link href={`/invoices/${encodeURIComponent(inv.invoiceNumber)}/print`}>
-                      <Button size="sm" variant="outline" className="h-8 gap-1 text-slate-700 border-slate-300">
+                      <Button size="sm" variant="outline" className="h-8 gap-1">
                         <Printer className="h-3.5 w-3.5" />
                         Print / PDF
                       </Button>
