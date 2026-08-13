@@ -4,18 +4,24 @@ export const UserRoleSchema = z.enum(["admin", "sales", "account_manager", "clie
 export type UserRole = z.infer<typeof UserRoleSchema>;
 
 export const LeadStatusSchema = z.enum([
-  "new", 
-  "initial count", 
-  "deck sent", 
-  "not interested", 
-  "call scheduled", 
-  "call done", 
-  "proposal sent", 
-  "closed"
+  "new",
+  "contacted",
+  "replied",
+  "call_booked",
+  "call_done",
+  "converted",
+  "dropped",
 ]);
 export type LeadStatus = z.infer<typeof LeadStatusSchema>;
 
-export const DealStageSchema = z.enum(["prospect", "proposal", "negotiation", "won", "lost"]);
+export const DealStageSchema = z.enum([
+  "discovery",
+  "site_assessment",
+  "quote_sent",
+  "negotiation",
+  "won",
+  "lost",
+]);
 export type DealStage = z.infer<typeof DealStageSchema>;
 
 export const ActivityTypeSchema = z.enum(["note", "call", "email", "meeting", "system"]);

@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+const emptyToUndefined = (schema: z.ZodTypeAny) =>
+  z.preprocess((val) => (typeof val === "string" && val.trim() === "" ? undefined : val), schema.optional());
+
 export const serverEnvSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
@@ -7,16 +10,16 @@ export const serverEnvSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url(),
   TOKEN_ENCRYPTION_KEY: z.string().min(32),
   // Optional integrations — app must boot without these
-  REDIS_URL: z.string().url().optional(),
-  GOOGLE_CLIENT_ID: z.string().optional(),
-  GOOGLE_CLIENT_SECRET: z.string().optional(),
-  GOOGLE_REDIRECT_URI: z.string().url().optional(),
-  SLACK_BOT_TOKEN: z.string().optional(),
-  SLACK_SIGNING_SECRET: z.string().optional(),
-  SLACK_APP_TOKEN: z.string().optional(),
-  STRIPE_SECRET_KEY: z.string().optional(),
-  STRIPE_WEBHOOK_SECRET: z.string().optional(),
-  RESEND_API_KEY: z.string().optional(),
+  REDIS_URL: emptyToUndefined(z.string().url()),
+  GOOGLE_CLIENT_ID: emptyToUndefined(z.string()),
+  GOOGLE_CLIENT_SECRET: emptyToUndefined(z.string()),
+  GOOGLE_REDIRECT_URI: emptyToUndefined(z.string().url()),
+  SLACK_BOT_TOKEN: emptyToUndefined(z.string()),
+  SLACK_SIGNING_SECRET: emptyToUndefined(z.string()),
+  SLACK_APP_TOKEN: emptyToUndefined(z.string()),
+  STRIPE_SECRET_KEY: emptyToUndefined(z.string()),
+  STRIPE_WEBHOOK_SECRET: emptyToUndefined(z.string()),
+  RESEND_API_KEY: emptyToUndefined(z.string()),
 });
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
 
@@ -27,7 +30,29 @@ export const publicEnvSchema = z.object({
 });
 export type PublicEnv = z.infer<typeof publicEnvSchema>;
 
+function loadEnvFiles() {
+  if (typeof process.loadEnvFile === "function") {
+    const candidates = [
+      ".env",
+      "../.env",
+      "../../.env",
+      "../../../.env",
+      ".env.local",
+      "../.env.local",
+      "../../.env.local",
+    ];
+    for (const file of candidates) {
+      try {
+        process.loadEnvFile(file);
+      } catch {
+        // Ignore if file does not exist or cannot be read
+      }
+    }
+  }
+}
+
 export function parseServerEnv(env: NodeJS.ProcessEnv = process.env): ServerEnv {
+  loadEnvFiles();
   const result = serverEnvSchema.safeParse(env);
   if (!result.success) {
     const missing = result.error.issues

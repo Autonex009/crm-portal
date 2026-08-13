@@ -24,7 +24,11 @@ interface Company {
   id: string;
   name: string;
   domain: string | null;
+  website?: string | null;
+  city?: string | null;
   industry: string | null;
+  source?: string | null;
+  tags?: string[] | null;
   owner_id: string;
   created_at: string;
 }
@@ -50,13 +54,17 @@ export function CompaniesTable({
     (c) =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.domain?.toLowerCase().includes(search.toLowerCase()) ||
-      c.industry?.toLowerCase().includes(search.toLowerCase())
+      c.city?.toLowerCase().includes(search.toLowerCase()) ||
+      c.industry?.toLowerCase().includes(search.toLowerCase()) ||
+      c.source?.toLowerCase().includes(search.toLowerCase()) ||
+      c.tags?.some((t) => t.toLowerCase().includes(search.toLowerCase()))
   );
 
   const filteredArchived = archivedCompanies.filter(
     (c) =>
       c.name.toLowerCase().includes(archiveSearch.toLowerCase()) ||
       c.domain?.toLowerCase().includes(archiveSearch.toLowerCase()) ||
+      c.city?.toLowerCase().includes(archiveSearch.toLowerCase()) ||
       c.industry?.toLowerCase().includes(archiveSearch.toLowerCase())
   );
 
@@ -126,7 +134,7 @@ export function CompaniesTable({
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search companies..."
+                placeholder="Search by name, city, industry, tags..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-8"
@@ -135,7 +143,7 @@ export function CompaniesTable({
             <CompanySheet />
           </div>
 
-          <div className="rounded-lg border bg-card">
+          <div className="rounded-lg border bg-card overflow-hidden">
             {filtered.length === 0 ? (
               search ? (
                 <EmptyState
@@ -156,53 +164,75 @@ export function CompaniesTable({
                 <TableHeader>
                   <TableRow>
                     <TableHead>Company</TableHead>
-                    <TableHead>Industry</TableHead>
-                    <TableHead>Domain</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Industry & Source</TableHead>
+                    <TableHead>Tags</TableHead>
                     <TableHead>Created</TableHead>
                     <TableHead className="w-12" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.map((company) => (
-                    <TableRow key={company.id}>
-                      <TableCell>
-                        <Link
-                          href={`/companies/${company.id}`}
-                          className="flex items-center gap-3 hover:underline"
-                        >
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback className="text-xs bg-blue-100 text-blue-700">
-                              {initials(company.name)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="font-medium">{company.name}</span>
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        {company.industry ? (
-                          <Badge variant="secondary" className="font-normal">{company.industry}</Badge>
-                        ) : (
-                          <span className="text-muted-foreground text-sm">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {company.domain ? (
-                          <a
-                            href={`https://${company.domain}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-sm text-primary hover:underline"
-                          >
-                            {company.domain}
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
-                        ) : (
-                          <span className="text-muted-foreground text-sm">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {formatDate(company.created_at)}
-                      </TableCell>
+                  {filtered.map((company) => {
+                    const displayUrl = company.website || (company.domain ? `https://${company.domain}` : null);
+                    return (
+                      <TableRow key={company.id}>
+                        <TableCell>
+                          <div className="flex flex-col gap-0.5">
+                            <Link
+                              href={`/companies/${company.id}`}
+                              className="flex items-center gap-2 hover:underline font-semibold text-foreground"
+                            >
+                              <Avatar className="h-7 w-7">
+                                <AvatarFallback className="text-[10px] bg-blue-100 text-blue-700 font-bold">
+                                  {initials(company.name)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span>{company.name}</span>
+                            </Link>
+                            {displayUrl && (
+                              <a
+                                href={displayUrl.startsWith("http") ? displayUrl : `https://${displayUrl}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary pl-9"
+                              >
+                                {company.domain || company.website}
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm font-medium text-foreground">
+                          {company.city || <span className="text-muted-foreground text-xs">—</span>}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            {company.industry ? (
+                              <Badge variant="secondary" className="font-normal text-xs w-fit">{company.industry}</Badge>
+                            ) : (
+                              <span className="text-muted-foreground text-xs">—</span>
+                            )}
+                            {company.source && (
+                              <span className="text-[11px] text-muted-foreground">Source: {company.source}</span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {company.tags && company.tags.length > 0 ? (
+                            <div className="flex flex-wrap gap-1 max-w-[200px]">
+                              {company.tags.map((tag) => (
+                                <Badge key={tag} variant="outline" className="text-[10px] px-1.5 py-0">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground text-xs">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {formatDate(company.created_at)}
+                        </TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -244,8 +274,9 @@ export function CompaniesTable({
                         </DropdownMenu>
                       </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
+                  );
+                })}
+              </TableBody>
               </Table>
             )}
           </div>

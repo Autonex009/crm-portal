@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui/empty-state";
-import { LeadStatusBadge } from "@/components/ui/badge";
+import { LeadStatus, LeadStatusBadge } from "@/components/ui/badge";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -16,14 +16,13 @@ import { LeadSheet } from "./lead-sheet";
 import { ScheduleMeetingDialog } from "./schedule-meeting-dialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { deleteLead, updateLeadStatus, archiveLead, restoreLead, hardDeleteLead } from "@/lib/actions/leads";
+import { ConvertLeadDialog } from "./convert-lead-dialog";
+import { ArrowRightLeft, TrendingUp, MoreHorizontal, Pencil, Trash2, Search, GitBranch, Archive, RotateCcw, Video } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-import { TrendingUp, MoreHorizontal, Pencil, Trash2, Search, GitBranch, Archive, RotateCcw, Video } from "lucide-react";
-import { formatDate } from "@/lib/utils";
 import { MermaidDiagram } from "@/components/ui/mermaid";
-import { leadLifecycleChart, type LeadStatus } from "@/lib/pipeline-charts";
+import { leadLifecycleChart } from "@/lib/pipeline-charts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-
+import { formatDate } from "@/lib/utils";
 
 interface Lead {
   id: string;
@@ -54,13 +53,12 @@ interface Contact { id: string; first_name: string; last_name: string }
 const STATUS_FILTERS: { label: string; value: string }[] = [
   { label: "All", value: "all" },
   { label: "New", value: "new" },
-  { label: "Initial Count", value: "initial count" },
-  { label: "Deck Sent", value: "deck sent" },
-  { label: "Not Interested", value: "not interested" },
-  { label: "Call Scheduled", value: "call scheduled" },
-  { label: "Call Done", value: "call done" },
-  { label: "Proposal Sent", value: "proposal sent" },
-  { label: "Closed", value: "closed" },
+  { label: "Contacted", value: "contacted" },
+  { label: "Replied", value: "replied" },
+  { label: "Call Booked", value: "call_booked" },
+  { label: "Call Done", value: "call_done" },
+  { label: "Converted", value: "converted" },
+  { label: "Dropped", value: "dropped" },
 ];
 
 export function LeadsClient({
@@ -78,6 +76,7 @@ export function LeadsClient({
   const [archiveSearch, setArchiveSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [scheduleFor, setScheduleFor] = useState<Lead | null>(null);
+  const [convertLead, setConvertLead] = useState<Lead | null>(null);
   const [isPending, startTransition] = useTransition();
   const [confirmAction, setConfirmAction] = useState<
     | { type: "delete"; id: string }
@@ -86,7 +85,7 @@ export function LeadsClient({
     | null
   >(null);
 
-  const lifecycleCounts = (["new", "initial count", "deck sent", "not interested", "call scheduled", "call done", "proposal sent", "closed"] as const).reduce(
+  const lifecycleCounts = (["new", "contacted", "replied", "call_booked", "call_done", "converted", "dropped"] as const).reduce(
     (acc, status) => {
       acc[status] = leads.filter((l) => l.status === status).length;
       return acc;
@@ -347,11 +346,20 @@ export function LeadsClient({
                               <Video className="h-4 w-4" />
                               Schedule Google Meet
                             </DropdownMenuItem>
+                            {lead.status !== "converted" && (
+                              <DropdownMenuItem
+                                className="text-emerald-600 font-semibold focus:text-emerald-700 focus:bg-emerald-50 dark:focus:bg-emerald-950/30"
+                                onClick={() => setConvertLead(lead)}
+                              >
+                                <ArrowRightLeft className="h-4 w-4" />
+                                Convert to Deal
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuSeparator />
-                            {(["new", "initial count", "deck sent", "not interested", "call scheduled", "call done", "proposal sent", "closed"] as const).map((s) => (
+                            {(["new", "contacted", "replied", "call_booked", "call_done", "converted", "dropped"] as const).map((s) => (
                               s !== lead.status && (
                                 <DropdownMenuItem key={s} onClick={() => handleStatusChange(lead.id, s)}>
-                                  Mark as {s}
+                                  Mark as {s.replace("_", " ")}
                                 </DropdownMenuItem>
                               )
                             ))}
@@ -506,6 +514,11 @@ export function LeadsClient({
       <ScheduleMeetingDialog
         lead={scheduleFor}
         onOpenChange={(open) => !open && setScheduleFor(null)}
+      />
+
+      <ConvertLeadDialog
+        lead={convertLead}
+        onOpenChange={(open) => !open && setConvertLead(null)}
       />
     </div>
   );

@@ -1,11 +1,12 @@
 import { formatCurrency } from "@/lib/utils";
 
-export type DealStage = "prospect" | "proposal" | "negotiation" | "won" | "lost";
-export type LeadStatus = "new" | "initial count" | "deck sent" | "not interested" | "call scheduled" | "call done" | "proposal sent" | "closed";
+export type DealStage = "discovery" | "site_assessment" | "quote_sent" | "negotiation" | "won" | "lost";
+export type LeadStatus = "new" | "contacted" | "replied" | "call_booked" | "call_done" | "converted" | "dropped";
 
 const DEAL_FLOW: { id: DealStage; node: string; label: string }[] = [
-  { id: "prospect", node: "P", label: "Prospect" },
-  { id: "proposal", node: "PR", label: "Proposal" },
+  { id: "discovery", node: "D", label: "Discovery" },
+  { id: "site_assessment", node: "SA", label: "Site Assessment" },
+  { id: "quote_sent", node: "QS", label: "Quote Sent" },
   { id: "negotiation", node: "N", label: "Negotiation" },
   { id: "won", node: "W", label: "Won" },
   { id: "lost", node: "L", label: "Lost" },
@@ -32,9 +33,10 @@ export function dealStageFlowChart(current: DealStage): string {
 
   return [
     "flowchart LR",
-    '  P["Prospect"] --> PR["Proposal"] --> N["Negotiation"] --> W["Won 🏆"]',
+    '  D["Discovery"] --> SA["Site Assessment"] --> QS["Quote Sent"] --> N["Negotiation"] --> W["Won 🏆"]',
     '  N -. "lost" .-> L["Lost"]',
-    '  PR -. "lost" .-> L',
+    '  QS -. "lost" .-> L',
+    '  SA -. "lost" .-> L',
     ...DEAL_FLOW.map((s) => `  class ${s.node} ${classFor(s.id)}`),
     SHARED_CLASSDEFS,
   ].join("\n");
@@ -47,12 +49,13 @@ export function dealPipelineChart(
   stats: Record<DealStage, { count: number; value: number }>
 ): string {
   const cell = (id: DealStage, label: string) =>
-    `"${label}<br/>${stats[id].count} deals<br/>${formatCurrency(stats[id].value)}"`;
+    `"${label}<br/>${stats[id]?.count || 0} deals<br/>${formatCurrency(stats[id]?.value || 0)}"`;
 
   return [
     "flowchart LR",
-    `  P[${cell("prospect", "Prospect")}] --> PR[${cell("proposal", "Proposal")}]`,
-    `  PR --> N[${cell("negotiation", "Negotiation")}]`,
+    `  D[${cell("discovery", "Discovery")}] --> SA[${cell("site_assessment", "Site Assessment")}]`,
+    `  SA --> QS[${cell("quote_sent", "Quote Sent")}]`,
+    `  QS --> N[${cell("negotiation", "Negotiation")}]`,
     `  N --> W[${cell("won", "Won 🏆")}]`,
     `  N -. lost .-> L[${cell("lost", "Lost")}]`,
     "  class W won",
@@ -69,7 +72,7 @@ export type QuoteStatus = "Draft" | "Presented" | "Accepted" | "Rejected" | "Clo
  * Rejected branch off Presented, mirroring how the deal pipeline branches to Lost.
  */
 export function quotePipelineChart(counts: Record<QuoteStatus, number>): string {
-  const cell = (id: QuoteStatus, label: string) => `"${label}<br/>${counts[id]} quotes"`;
+  const cell = (id: QuoteStatus, label: string) => `"${label}<br/>${counts[id] || 0} quotes"`;
 
   return [
     "flowchart LR",
@@ -89,22 +92,21 @@ export function quotePipelineChart(counts: Record<QuoteStatus, number>): string 
  * Lifecycle flow of leads: count per status, with the qualified path feeding deals.
  */
 export function leadLifecycleChart(counts: Record<LeadStatus, number>): string {
-  const cell = (id: LeadStatus, label: string) => `"${label}<br/>${counts[id]} leads"`;
+  const cell = (id: LeadStatus, label: string) => `"${label}<br/>${counts[id] || 0} leads"`;
 
   return [
     "flowchart LR",
-    `  NW(${cell("new", "New")}) --> IC(${cell("initial count", "Initial Count")})`,
-    `  IC --> DS(${cell("deck sent", "Deck Sent")})`,
-    `  IC --> CS(${cell("call scheduled", "Call Scheduled")})`,
-    `  CS --> CD(${cell("call done", "Call Done")})`,
-    `  CD --> PS(${cell("proposal sent", "Proposal Sent")})`,
-    `  PS --> C(${cell("closed", "Closed")})`,
-    `  NW -. dropped .-> NI(${cell("not interested", "Not Interested")})`,
-    `  IC -. dropped .-> NI`,
-    `  CS -. dropped .-> NI`,
-    `  PS -. dropped .-> NI`,
-    "  class C won",
-    "  class NI lost",
+    `  NW(${cell("new", "New")}) --> CT(${cell("contacted", "Contacted")})`,
+    `  CT --> RP(${cell("replied", "Replied")})`,
+    `  RP --> CB(${cell("call_booked", "Call Booked")})`,
+    `  CB --> CD(${cell("call_done", "Call Done")})`,
+    `  CD --> CV(${cell("converted", "Converted 🏆")})`,
+    `  NW -. dropped .-> DP(${cell("dropped", "Dropped")})`,
+    `  CT -. dropped .-> DP`,
+    `  RP -. dropped .-> DP`,
+    `  CB -. dropped .-> DP`,
+    "  class CV won",
+    "  class DP lost",
     "  classDef won fill:#10b981,stroke:#059669,color:#ffffff;",
     "  classDef lost fill:#ef4444,stroke:#dc2626,color:#ffffff;",
   ].join("\n");
