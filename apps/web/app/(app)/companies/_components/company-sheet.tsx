@@ -22,7 +22,11 @@ interface Company {
   id: string;
   name: string;
   domain: string | null;
+  website?: string | null;
+  city?: string | null;
   industry: string | null;
+  source?: string | null;
+  tags?: string[] | null;
 }
 
 interface CompanySheetProps {
@@ -88,28 +92,71 @@ export function CompanySheet({ company, trigger, onSuccess }: CompanySheetProps)
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="domain">Domain</Label>
-              <Input
-                id="domain"
-                name="domain"
-                defaultValue={company?.domain ?? ""}
-                placeholder="acme.com"
-              />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="city">City</Label>
+                <Input
+                  id="city"
+                  name="city"
+                  defaultValue={company?.city ?? ""}
+                  placeholder="Mumbai"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="domain">Domain</Label>
+                <Input
+                  id="domain"
+                  name="domain"
+                  defaultValue={company?.domain ?? ""}
+                  placeholder="acme.com"
+                />
+              </div>
             </div>
 
             <div className="space-y-1.5">
-              <Label>Industry</Label>
-              <Select value={industry} onValueChange={setIndustry}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select industry" />
-                </SelectTrigger>
-                <SelectContent>
-                  {INDUSTRIES.map((ind) => (
-                    <SelectItem key={ind} value={ind}>{ind}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="website">Website URL</Label>
+              <Input
+                id="website"
+                name="website"
+                defaultValue={company?.website ?? ""}
+                placeholder="https://acme.com"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Industry</Label>
+                <Select value={industry} onValueChange={setIndustry}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select industry" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {INDUSTRIES.map((ind) => (
+                      <SelectItem key={ind} value={ind}>{ind}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="source">Lead Source</Label>
+                <Input
+                  id="source"
+                  name="source"
+                  defaultValue={company?.source ?? ""}
+                  placeholder="Website / Inbound / Referral"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="tags">Tags (comma-separated)</Label>
+              <Input
+                id="tags"
+                name="tags"
+                defaultValue={company?.tags?.join(", ") ?? ""}
+                placeholder="Enterprise, High-Priority, Manufacturing"
+              />
             </div>
           </SheetBody>
         </form>

@@ -49,15 +49,14 @@ function toIsoDate(val: string | null): string | null {
 
 const LEAD_STATUSES = [
   "new", 
-  "initial count", 
-  "deck sent", 
-  "not interested", 
-  "call scheduled", 
-  "call done", 
-  "proposal sent", 
-  "closed"
+  "contacted", 
+  "replied", 
+  "call_booked", 
+  "call_done", 
+  "converted", 
+  "dropped"
 ] as const;
-const DEAL_STAGES = ["prospect", "proposal", "negotiation", "won", "lost"] as const;
+const DEAL_STAGES = ["discovery", "site_assessment", "quote_sent", "negotiation", "won", "lost"] as const;
 type LeadStatus = (typeof LEAD_STATUSES)[number];
 type DealStage = (typeof DEAL_STAGES)[number];
 
@@ -241,10 +240,10 @@ export async function importDeals(rows: ImportRow[]): Promise<ImportResult> {
       companyByName.set(companyName.toLowerCase(), created.id);
     }
 
-    const stageRaw = (pick(row, ["stage", "status", "deal stage"]) ?? "prospect").toLowerCase();
+    const stageRaw = (pick(row, ["stage", "status", "deal stage"]) ?? "discovery").toLowerCase();
     const stage: DealStage = (DEAL_STAGES as readonly string[]).includes(stageRaw)
       ? (stageRaw as DealStage)
-      : "prospect";
+      : "discovery";
 
     records.push({
       title,

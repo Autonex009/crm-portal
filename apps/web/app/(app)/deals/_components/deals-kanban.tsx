@@ -25,7 +25,7 @@ import { Calendar, Plus, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/components/ui/use-toast";
 
-type DealStage = "prospect" | "proposal" | "negotiation" | "won" | "lost";
+type DealStage = "discovery" | "site_assessment" | "quote_sent" | "negotiation" | "won" | "lost";
 
 export interface DealCard {
   id: string;
@@ -44,11 +44,12 @@ interface Company { id: string; name: string }
 interface Contact { id: string; first_name: string; last_name: string }
 
 const STAGES: { id: DealStage; label: string; colorClass: string; dotColor: string }[] = [
-  { id: "prospect",    label: "Prospect",    colorClass: "bg-muted/40 border-border",  dotColor: "bg-slate-400" },
-  { id: "proposal",   label: "Proposal",    colorClass: "bg-blue-500/10 border-blue-500/20",    dotColor: "bg-blue-500" },
-  { id: "negotiation",label: "Negotiation", colorClass: "bg-amber-500/10 border-amber-500/20",  dotColor: "bg-amber-500" },
-  { id: "won",        label: "Won",         colorClass: "bg-emerald-500/10 border-emerald-500/20", dotColor: "bg-emerald-500" },
-  { id: "lost",       label: "Lost",        colorClass: "bg-red-500/10 border-red-500/20",      dotColor: "bg-red-400" },
+  { id: "discovery",       label: "Discovery",       colorClass: "bg-indigo-500/10 border-indigo-500/20", dotColor: "bg-indigo-500" },
+  { id: "site_assessment", label: "Site Assessment", colorClass: "bg-cyan-500/10 border-cyan-500/20",   dotColor: "bg-cyan-500" },
+  { id: "quote_sent",      label: "Quote Sent",      colorClass: "bg-blue-500/10 border-blue-500/20",     dotColor: "bg-blue-500" },
+  { id: "negotiation",     label: "Negotiation",     colorClass: "bg-amber-500/10 border-amber-500/20",   dotColor: "bg-amber-500" },
+  { id: "won",             label: "Won",             colorClass: "bg-emerald-500/10 border-emerald-500/20",dotColor: "bg-emerald-500" },
+  { id: "lost",            label: "Lost",            colorClass: "bg-red-500/10 border-red-500/20",       dotColor: "bg-red-400" },
 ];
 
 function KanbanColumn({

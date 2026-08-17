@@ -34,9 +34,9 @@ export default async function DealsPage() {
       .order("first_name"),
   ]);
 
-  type DealStage = "prospect" | "proposal" | "negotiation" | "won" | "lost";
+  type DealStage = "discovery" | "site_assessment" | "quote_sent" | "negotiation" | "won" | "lost";
 
-  const STAGE_IDS = ["prospect", "proposal", "negotiation", "won", "lost"] as const;
+  const STAGE_IDS = ["discovery", "site_assessment", "quote_sent", "negotiation", "won", "lost"] as const;
   const pipelineStats = STAGE_IDS.reduce(
     (acc, id) => {
       const inStage = (deals ?? []).filter((d) => d.stage === id);

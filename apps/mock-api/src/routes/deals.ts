@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { deals, companies, contacts, paginate } from "../store";
+import { deals, companies, contacts, quotes, paginate } from "../store";
 import { CreateDealSchema, Deal, DealStageSchema } from "@crm/types";
 import { z } from "zod";
 
@@ -96,11 +96,16 @@ router.post("/", (req: Request, res: Response) => {
       title: parsed.title,
       job_title: parsed.job_title || null,
       primary_contact_id: parsed.primary_contact_id || null,
-      stage: parsed.stage || "prospect",
+      lead_id: parsed.lead_id || null,
+      stage: parsed.stage || "discovery",
       amount: parsed.amount || 0,
       product_use_case: parsed.product_use_case || null,
       probability: parsed.probability || 10,
       next_action: parsed.next_action || null,
+      site_assessment_date: parsed.site_assessment_date || null,
+      site_assessment_location: parsed.site_assessment_location || null,
+      site_assessment_notes: parsed.site_assessment_notes || null,
+      lost_reason: parsed.lost_reason || null,
       notes: parsed.notes || null,
       owner_id: req.user.id,
       expected_close_date: parsed.expected_close_date || null,
@@ -209,6 +214,16 @@ router.patch("/:id/stage", (req: Request, res: Response) => {
   try {
     const parsedStage = DealStageSchema.parse(stage);
 
+    if (parsedStage === "quote_sent") {
+      const hasQuote = Array.from(quotes.values()).some((q) => q.deal_id === dealId && q.deleted_at === null);
+      if (!hasQuote) {
+        return res.status(400).json({
+          success: false,
+          error: "A quote must be attached to the deal before moving to Quote Sent stage."
+        });
+      }
+    }
+
     deal.stage = parsedStage;
     if (parsedStage === "won") {
       deal.probability = 100;
@@ -266,11 +281,16 @@ router.post("/import", (req: Request, res: Response) => {
         title: parsed.title,
         job_title: parsed.job_title || null,
         primary_contact_id: parsed.primary_contact_id || null,
-        stage: parsed.stage || "prospect",
+        lead_id: parsed.lead_id || null,
+        stage: parsed.stage || "discovery",
         amount: parsed.amount || 0,
         product_use_case: parsed.product_use_case || null,
         probability: parsed.probability || 10,
         next_action: parsed.next_action || null,
+        site_assessment_date: parsed.site_assessment_date || null,
+        site_assessment_location: parsed.site_assessment_location || null,
+        site_assessment_notes: parsed.site_assessment_notes || null,
+        lost_reason: parsed.lost_reason || null,
         notes: parsed.notes || null,
         owner_id: req.user!.id,
         expected_close_date: parsed.expected_close_date || null,
