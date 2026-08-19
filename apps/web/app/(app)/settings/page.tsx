@@ -1,4 +1,15 @@
-import { Settings } from "lucide-react";
+import {
+  Settings as SettingsIcon,
+  User,
+  Bell,
+  Palette,
+  Building,
+  Users,
+  Webhook,
+  Activity,
+  Database,
+  ShieldCheck,
+} from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -13,7 +24,7 @@ import { NotificationsCard } from "./_components/notifications-card";
 import { AuditLogCard } from "./_components/audit-log-card";
 import { DataManagementCard } from "./_components/data-management-card";
 
-export const metadata = { title: "Settings — DealBridge" };
+export const metadata = { title: "Workspace & Profile Settings — DealBridge" };
 
 export default async function SettingsPage({
   searchParams,
@@ -42,25 +53,67 @@ export default async function SettingsPage({
   ]);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-          <Settings className="h-6 w-6 text-muted-foreground" />
-          Settings
-        </h1>
-        <p className="text-muted-foreground text-sm mt-1">Configure your CRM workspace</p>
+    <div className="space-y-8 pb-10">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-5">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 dark:bg-slate-800/80 px-3 py-1 text-xs font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+              <SettingsIcon className="h-3.5 w-3.5 text-primary" />
+              <span>Workspace Administration</span>
+            </span>
+          </div>
+          <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
+            Account & Workspace Settings
+          </h1>
+          <p className="text-xs text-muted-foreground mt-1">
+            Manage your personal profile, security credentials, team members, and CRM integration parameters.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 rounded-xl bg-card border px-3.5 py-2 text-xs font-semibold text-foreground shadow-2xs">
+            <ShieldCheck className="h-4 w-4 text-emerald-500" />
+            <span>Role: <strong className="capitalize">{profile?.role ?? "Sales"}</strong></span>
+          </div>
+        </div>
       </div>
 
-      <Tabs defaultValue={sp.tab ?? "profile"}>
-        <TabsList className="flex-wrap h-auto">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="appearance">Appearance</TabsTrigger>
-          <TabsTrigger value="organization">Organization</TabsTrigger>
-          <TabsTrigger value="team">Team</TabsTrigger>
-          <TabsTrigger value="integrations">Integrations</TabsTrigger>
-          <TabsTrigger value="audit">Audit log</TabsTrigger>
-          <TabsTrigger value="data">Data export</TabsTrigger>
+      {/* Settings Navigation Tabs */}
+      <Tabs defaultValue={sp.tab ?? "profile"} className="space-y-6">
+        <TabsList className="flex flex-wrap h-auto gap-1 bg-card p-1.5 rounded-xl border shadow-2xs">
+          <TabsTrigger value="profile" className="gap-2 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <User className="h-3.5 w-3.5" />
+            Profile & Security
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="gap-2 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Bell className="h-3.5 w-3.5" />
+            Notifications
+          </TabsTrigger>
+          <TabsTrigger value="appearance" className="gap-2 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Palette className="h-3.5 w-3.5" />
+            Appearance
+          </TabsTrigger>
+          <TabsTrigger value="organization" className="gap-2 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Building className="h-3.5 w-3.5" />
+            Organization
+          </TabsTrigger>
+          <TabsTrigger value="team" className="gap-2 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Users className="h-3.5 w-3.5" />
+            Team Members
+          </TabsTrigger>
+          <TabsTrigger value="integrations" className="gap-2 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Webhook className="h-3.5 w-3.5" />
+            Integrations
+          </TabsTrigger>
+          <TabsTrigger value="audit" className="gap-2 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Activity className="h-3.5 w-3.5" />
+            Audit Logs
+          </TabsTrigger>
+          <TabsTrigger value="data" className="gap-2 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Database className="h-3.5 w-3.5" />
+            Data Export
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
@@ -86,7 +139,11 @@ export default async function SettingsPage({
         </TabsContent>
 
         <TabsContent value="team">
-          <TeamCard members={members ?? []} currentUserId={user.id} />
+          <TeamCard
+            members={members ?? []}
+            currentUserId={user.id}
+            currentUserRole={profile?.role ?? "sales"}
+          />
         </TabsContent>
 
         <TabsContent value="integrations">

@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { leads, companies, contacts, paginate } from "../store";
+import { leads, companies, contacts, deals, activities, paginate } from "../store";
 import { CreateLeadSchema, Lead, LeadStatusSchema } from "@crm/types";
 import { z } from "zod";
 
@@ -379,9 +379,77 @@ router.delete("/:id", (req: Request, res: Response) => {
   lead.updated_at = new Date().toISOString();
   leads.set(leadId, lead);
 
+  return res.json({ success: true, data: lead });
+});
+
+// POST /api/v1/leads/:id/convert
+router.post("/:id/convert", (req: Request, res: Response) => {
+  const leadId = req.params.id;
+  if (!leadId) {
+    return res.status(400).json({ success: false, error: "ID param is required" });
+  }
+
+  const lead = leads.get(leadId);
+  if (!lead) {
+    return res.status(404).json({ success: false, error: "Lead not found" });
+  }
+
+  const { title, amount, expected_close_date, notes } = req.body || {};
+  const timestamp = new Date().toISOString();
+
+  // Mark Lead as converted
+  lead.status = "converted";
+  lead.updated_at = timestamp;
+  leads.set(leadId, lead);
+
+  // Create new Deal
+  const dealId = crypto.randomUUID();
+  const newDeal = {
+    id: dealId,
+    title: title || lead.title || `${lead.contact_name || "New"} Deal`,
+    job_title: lead.job_title || null,
+    company_id: lead.company_id || "c1111111-1111-1111-1111-111111111111",
+    primary_contact_id: lead.contact_id || null,
+    lead_id: leadId,
+    stage: "discovery" as const,
+    amount: Number(amount) || lead.value_estimate || 1000000,
+    product_use_case: lead.product_interest || null,
+    probability: 20,
+    next_action: "Schedule initial discovery & site assessment review",
+    site_assessment_date: null,
+    site_assessment_location: null,
+    site_assessment_notes: null,
+    lost_reason: null,
+    notes: notes || lead.notes || null,
+    owner_id: lead.assigned_to || (req.user ? req.user.id : "7b3f8c5d-d922-43bf-b51f-d31e9c5f87b2"),
+    expected_close_date: expected_close_date || new Date(Date.now() + 86400000 * 30).toISOString().split("T")[0],
+    deleted_at: null,
+    created_at: timestamp,
+    updated_at: timestamp
+  };
+
+  deals.set(dealId, newDeal);
+
+  // System activity log
+  const activityId = crypto.randomUUID();
+  activities.set(activityId, {
+    id: activityId,
+    entity_type: "deal",
+    entity_id: dealId,
+    type: "system",
+    author_id: req.user ? req.user.id : "7b3f8c5d-d922-43bf-b51f-d31e9c5f87b2",
+    body: `Deal created from Lead conversion (${lead.title || lead.contact_name || leadId})`,
+    occurred_at: timestamp,
+    created_at: timestamp,
+    updated_at: timestamp
+  });
+
   return res.json({
     success: true,
-    data: lead
+    data: {
+      lead,
+      deal: newDeal
+    }
   });
 });
 

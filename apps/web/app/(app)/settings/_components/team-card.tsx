@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { updateUserRole } from "@/lib/actions/settings";
 import { toast } from "@/components/ui/use-toast";
-import { initials, formatDate } from "@/lib/utils";
+import { initials, formatDate, roleLabel } from "@/lib/utils";
 
 interface Member {
   id: string;
@@ -15,11 +15,27 @@ interface Member {
   created_at: string;
 }
 
-const ROLES = ["admin", "sales", "account_manager", "client"] as const;
+const ROLES = ["owner", "admin", "sales", "account_manager", "client"] as const;
 type Role = (typeof ROLES)[number];
 
-export function TeamCard({ members, currentUserId }: { members: Member[]; currentUserId: string }) {
+// Only an owner may hand out (or take away) the owner/admin roles.
+const PRIVILEGED_ROLES = new Set<string>(["owner", "admin"]);
+
+export function TeamCard({
+  members,
+  currentUserId,
+  currentUserRole,
+}: {
+  members: Member[];
+  currentUserId: string;
+  currentUserRole: string;
+}) {
   const [isPending, startTransition] = useTransition();
+
+  const viewerIsOwner = currentUserRole === "owner";
+  const canManageRoles = viewerIsOwner || currentUserRole === "admin";
+  // Admins can assign everyone except owner/admin; owners can assign anything.
+  const assignableRoles = ROLES.filter((r) => viewerIsOwner || !PRIVILEGED_ROLES.has(r));
 
   function handleRoleChange(id: string, role: Role) {
     startTransition(async () => {
@@ -42,42 +58,50 @@ export function TeamCard({ members, currentUserId }: { members: Member[]; curren
       </div>
 
       <div className="divide-y rounded-lg border">
-        {members.map((member) => (
-          <div key={member.id} className="flex items-center justify-between p-4">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="text-xs">{initials(member.full_name)}</AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="text-sm font-medium">{member.full_name}</p>
-                <p className="text-xs text-muted-foreground">Joined {formatDate(member.created_at)}</p>
-              </div>
-            </div>
+        {members.map((member) => {
+          const isSelf = member.id === currentUserId;
+          // A privileged (owner/admin) member can only be changed by an owner.
+          const editable =
+            canManageRoles && !isSelf && (viewerIsOwner || !PRIVILEGED_ROLES.has(member.role));
 
-            {member.id === currentUserId ? (
-              <Badge variant="secondary" className="capitalize font-normal">
-                {member.role.replace("_", " ")} (you)
-              </Badge>
-            ) : (
-              <Select
-                value={member.role}
-                onValueChange={(role) => handleRoleChange(member.id, role as Role)}
-                disabled={isPending}
-              >
-                <SelectTrigger className="w-40 capitalize">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ROLES.map((r) => (
-                    <SelectItem key={r} value={r} className="capitalize">
-                      {r.replace("_", " ")}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          </div>
-        ))}
+          return (
+            <div key={member.id} className="flex items-center justify-between p-4">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="text-xs">{initials(member.full_name)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-sm font-medium">{member.full_name}</p>
+                  <p className="text-xs text-muted-foreground">Joined {formatDate(member.created_at)}</p>
+                </div>
+              </div>
+
+              {editable ? (
+                <Select
+                  value={member.role}
+                  onValueChange={(role) => handleRoleChange(member.id, role as Role)}
+                  disabled={isPending}
+                >
+                  <SelectTrigger className="w-44">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {assignableRoles.map((r) => (
+                      <SelectItem key={r} value={r}>
+                        {roleLabel(r)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Badge variant="secondary" className="font-normal">
+                  {roleLabel(member.role)}
+                  {isSelf ? " (you)" : ""}
+                </Badge>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

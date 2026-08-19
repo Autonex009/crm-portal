@@ -2,17 +2,29 @@ import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/auth";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Building2, User, Calendar, IndianRupee, Percent, Package, Flag } from "lucide-react";
+import { ArrowLeft, Building2, User, Calendar, IndianRupee, Percent, Package, Flag, CheckCircle2, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DealStageBadge } from "@/components/ui/badge";
 import { ActivityTimeline } from "@/components/crm/activity-timeline";
 import { AddActivityForm } from "@/components/crm/add-activity-form";
 import { DealSheet } from "../_components/deal-sheet";
+import { SiteAssessmentCard } from "../_components/site-assessment-card";
 import { MermaidDiagram } from "@/components/ui/mermaid";
 import { dealStageFlowChart, type DealStage as ChartDealStage } from "@/lib/pipeline-charts";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const metadata = { title: "Deal Details — DealBridge" };
+
+type DealStage = "discovery" | "site_assessment" | "quote_sent" | "negotiation" | "won" | "lost";
+
+const STAGE_LABELS: Record<DealStage, string> = {
+  discovery: "Discovery",
+  site_assessment: "Site Assessment",
+  quote_sent: "Quote Sent",
+  negotiation: "Negotiation",
+  won: "Won",
+  lost: "Lost",
+};
 
 export default async function DealDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -53,8 +65,6 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
   const company = Array.isArray(deal.companies) ? deal.companies[0] : deal.companies;
   const contact = Array.isArray(deal.contacts) ? deal.contacts[0] : deal.contacts;
 
-  type DealStage = "prospect" | "proposal" | "negotiation" | "won" | "lost";
-
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
@@ -72,6 +82,24 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-4">
+          {deal.stage === "won" && (
+            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                <div>
+                  <h4 className="font-semibold text-foreground text-sm">Deal Won! Ready for Invoicing</h4>
+                  <p className="text-xs text-muted-foreground">This deal is closed won. Generate a GST Tax Invoice to finalize.</p>
+                </div>
+              </div>
+              <Link href={`/quotes?deal_id=${deal.id}`}>
+                <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5">
+                  <Receipt className="h-4 w-4" />
+                  View Quote / Invoice
+                </Button>
+              </Link>
+            </div>
+          )}
+
           <div className="rounded-xl border bg-card p-6">
             <div className="flex items-start justify-between mb-4">
               <div>
@@ -90,8 +118,8 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
 
             <div className="grid grid-cols-2 gap-4 pt-4 border-t">
               <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-green-100 p-2">
-                  <IndianRupee className="h-4 w-4 text-green-600" />
+                <div className="rounded-lg bg-green-100 dark:bg-green-950 p-2">
+                  <IndianRupee className="h-4 w-4 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Deal Value</p>
@@ -101,8 +129,8 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
 
               {company && (
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-blue-100 p-2">
-                    <Building2 className="h-4 w-4 text-blue-600" />
+                  <div className="rounded-lg bg-blue-100 dark:bg-blue-950 p-2">
+                    <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Company</p>
@@ -115,8 +143,8 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
 
               {contact && (
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-purple-100 p-2">
-                    <User className="h-4 w-4 text-purple-600" />
+                  <div className="rounded-lg bg-purple-100 dark:bg-purple-950 p-2">
+                    <User className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Primary Contact</p>
@@ -129,8 +157,8 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
 
               {deal.expected_close_date && (
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-orange-100 p-2">
-                    <Calendar className="h-4 w-4 text-orange-600" />
+                  <div className="rounded-lg bg-orange-100 dark:bg-orange-950 p-2">
+                    <Calendar className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Expected Closing</p>
@@ -141,8 +169,8 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
 
               {deal.probability != null && (
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-teal-100 p-2">
-                    <Percent className="h-4 w-4 text-teal-600" />
+                  <div className="rounded-lg bg-teal-100 dark:bg-teal-950 p-2">
+                    <Percent className="h-4 w-4 text-teal-600 dark:text-teal-400" />
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Probability</p>
@@ -153,8 +181,8 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
 
               {deal.product_use_case && (
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-indigo-100 p-2">
-                    <Package className="h-4 w-4 text-indigo-600" />
+                  <div className="rounded-lg bg-indigo-100 dark:bg-indigo-950 p-2">
+                    <Package className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Product / Use Case</p>
@@ -165,8 +193,8 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
 
               {deal.next_action && (
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-rose-100 p-2">
-                    <Flag className="h-4 w-4 text-rose-600" />
+                  <div className="rounded-lg bg-rose-100 dark:bg-rose-950 p-2">
+                    <Flag className="h-4 w-4 text-rose-600 dark:text-rose-400" />
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Next Action</p>
@@ -183,6 +211,14 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
               </div>
             )}
           </div>
+
+          {/* Site Assessment Component */}
+          <SiteAssessmentCard
+            dealId={deal.id}
+            assessmentDate={deal.site_assessment_date ?? null}
+            assessmentLocation={deal.site_assessment_location ?? null}
+            assessmentNotes={deal.site_assessment_notes ?? null}
+          />
 
           <div className="rounded-xl border bg-card p-6">
             <h3 className="font-semibold mb-4">Deal Journey</h3>
@@ -204,7 +240,7 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
           <div className="rounded-xl border bg-card p-4">
             <h3 className="font-semibold text-sm mb-3">Pipeline Stage</h3>
             <div className="space-y-1">
-              {(["prospect", "proposal", "negotiation", "won", "lost"] as const).map((stage) => (
+              {(["discovery", "site_assessment", "quote_sent", "negotiation", "won", "lost"] as const).map((stage) => (
                 <div
                   key={stage}
                   className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm capitalize ${
@@ -218,7 +254,7 @@ export default async function DealDetailPage({ params }: { params: Promise<{ id:
                       deal.stage === stage ? "bg-primary" : "bg-muted"
                     }`}
                   />
-                  {stage}
+                  {STAGE_LABELS[stage]}
                 </div>
               ))}
             </div>

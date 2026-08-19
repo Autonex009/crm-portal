@@ -1,10 +1,5 @@
 @import "tailwindcss";
 
-/*
-  Tailwind v4: register custom colors that reference CSS variables so that
-  utility classes like bg-background, text-foreground, text-muted-foreground
-  etc. are generated and respect dark-mode variable swaps.
-*/
 @theme inline {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
@@ -32,53 +27,48 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 220 38% 97%;
+    --foreground: 224 71% 4%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 224 71% 4%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    /* --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%; */
-    --primary: 0 0% 0%;
+    --popover-foreground: 224 71% 4%;
+    --primary: 238 84% 59%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --secondary: 215 28% 93%;
+    --secondary-foreground: 224 71% 4%;
+    --muted: 220 20% 93%;
+    --muted-foreground: 218 15% 45%;
+    --accent: 238 84% 96%;
+    --accent-foreground: 238 84% 45%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    /* --ring: 221.2 83.2% 53.3%; */
-    --ring: 0 0% 0%;
-    --radius: 0.5rem;
+    --border: 220 20% 88%;
+    --input: 220 20% 88%;
+    --ring: 238 84% 59%;
+    --radius: 0.75rem;
   }
 
   .dark {
     --background: 224 71% 4%;
-    --foreground: 213 31% 91%;
-    --card: 224 39% 8%;
-    --card-foreground: 213 31% 91%;
-    --popover: 224 39% 8%;
-    --popover-foreground: 213 31% 91%;
-    /* --primary: 217.2 91.2% 59.8%; */
-    --primary: 0 0% 100%;
+    --foreground: 213 31% 96%;
+    --card: 224 39% 7.5%;
+    --card-foreground: 213 31% 96%;
+    --popover: 224 39% 7.5%;
+    --popover-foreground: 213 31% 96%;
+    --primary: 238 84% 67%;
     --primary-foreground: 224 71% 4%;
     --secondary: 222 32% 14%;
     --secondary-foreground: 210 40% 96%;
-    --muted: 222 32% 14%;
-    --muted-foreground: 215 20% 60%;
-    --accent: 222 32% 16%;
-    --accent-foreground: 210 40% 96%;
+    --muted: 222 32% 12%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 238 40% 16%;
+    --accent-foreground: 238 84% 80%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 210 40% 98%;
-    --border: 222 32% 16%;
-    --input: 222 32% 14%;
-    /* --ring: 217.2 91.2% 59.8%; */
-    --ring: 0 0% 100%;
+    --border: 222 32% 15%;
+    --input: 222 32% 15%;
+    --ring: 238 84% 67%;
   }
 
   * {
@@ -89,5 +79,32 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     font-feature-settings: "rlig" 1, "calt" 1;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
+
+  /* Custom subtle scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
+}
+
+.glass-card {
+  background: hsl(var(--card) / 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dark .glass-card {
+  background: hsl(var(--card) / 0.75);
 }
