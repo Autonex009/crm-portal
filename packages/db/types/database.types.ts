@@ -179,6 +179,7 @@ export type Database = {
       companies: {
         Row: {
           archived_at: string | null
+          city: string | null
           created_at: string
           deleted_at: string | null
           domain: string | null
@@ -187,10 +188,14 @@ export type Database = {
           logo_path: string | null
           name: string
           owner_id: string
+          source: string | null
+          tags: string[] | null
           updated_at: string
+          website: string | null
         }
         Insert: {
           archived_at?: string | null
+          city?: string | null
           created_at?: string
           deleted_at?: string | null
           domain?: string | null
@@ -199,10 +204,14 @@ export type Database = {
           logo_path?: string | null
           name: string
           owner_id: string
+          source?: string | null
+          tags?: string[] | null
           updated_at?: string
+          website?: string | null
         }
         Update: {
           archived_at?: string | null
+          city?: string | null
           created_at?: string
           deleted_at?: string | null
           domain?: string | null
@@ -211,7 +220,10 @@ export type Database = {
           logo_path?: string | null
           name?: string
           owner_id?: string
+          source?: string | null
+          tags?: string[] | null
           updated_at?: string
+          website?: string | null
         }
         Relationships: [
           {
@@ -282,12 +294,17 @@ export type Database = {
           expected_close_date: string | null
           id: string
           job_title: string | null
+          lead_id: string | null
+          lost_reason: string | null
           next_action: string | null
           notes: string | null
           owner_id: string
           primary_contact_id: string | null
           probability: number | null
           product_use_case: string | null
+          site_assessment_date: string | null
+          site_assessment_location: string | null
+          site_assessment_notes: string | null
           stage: string
           title: string
           updated_at: string
@@ -300,12 +317,17 @@ export type Database = {
           expected_close_date?: string | null
           id?: string
           job_title?: string | null
+          lead_id?: string | null
+          lost_reason?: string | null
           next_action?: string | null
           notes?: string | null
           owner_id: string
           primary_contact_id?: string | null
           probability?: number | null
           product_use_case?: string | null
+          site_assessment_date?: string | null
+          site_assessment_location?: string | null
+          site_assessment_notes?: string | null
           stage?: string
           title?: string
           updated_at?: string
@@ -318,12 +340,17 @@ export type Database = {
           expected_close_date?: string | null
           id?: string
           job_title?: string | null
+          lead_id?: string | null
+          lost_reason?: string | null
           next_action?: string | null
           notes?: string | null
           owner_id?: string
           primary_contact_id?: string | null
           probability?: number | null
           product_use_case?: string | null
+          site_assessment_date?: string | null
+          site_assessment_location?: string | null
+          site_assessment_notes?: string | null
           stage?: string
           title?: string
           updated_at?: string
@@ -447,12 +474,14 @@ export type Database = {
           company_id: string
           created_at: string
           currency: string
+          deal_id: string | null
           deleted_at: string | null
           due_date: string | null
           id: string
           invoice_number: string
           payment_link: string | null
           quote_id: string
+          source_quote_id: string | null
           status: string
           stripe_invoice_id: string | null
           updated_at: string
@@ -463,12 +492,14 @@ export type Database = {
           company_id: string
           created_at?: string
           currency?: string
+          deal_id?: string | null
           deleted_at?: string | null
           due_date?: string | null
           id?: string
           invoice_number: string
           payment_link?: string | null
           quote_id: string
+          source_quote_id?: string | null
           status?: string
           stripe_invoice_id?: string | null
           updated_at?: string
@@ -479,12 +510,14 @@ export type Database = {
           company_id?: string
           created_at?: string
           currency?: string
+          deal_id?: string | null
           deleted_at?: string | null
           due_date?: string | null
           id?: string
           invoice_number?: string
           payment_link?: string | null
           quote_id?: string
+          source_quote_id?: string | null
           status?: string
           stripe_invoice_id?: string | null
           updated_at?: string

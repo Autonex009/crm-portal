@@ -28,7 +28,7 @@ interface Lead {
   location: string | null;
   product_interest: string | null;
   source: string | null;
-  status: "new" | "initial count" | "deck sent" | "not interested" | "call scheduled" | "call done" | "proposal sent" | "closed";
+  status: "new" | "contacted" | "replied" | "call_booked" | "call_done" | "converted" | "dropped";
   value_estimate: number | null;
   next_follow_up_date: string | null;
   notes: string | null;
@@ -126,13 +126,12 @@ export function LeadSheet({ lead, companies, contacts, trigger }: LeadSheetProps
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="new">New</SelectItem>
-                  <SelectItem value="initial count">Initial Count</SelectItem>
-                  <SelectItem value="deck sent">Deck Sent</SelectItem>
-                  <SelectItem value="call scheduled">Call Scheduled</SelectItem>
-                  <SelectItem value="call done">Call Done</SelectItem>
-                  <SelectItem value="proposal sent">Proposal Sent</SelectItem>
-                  <SelectItem value="closed">Closed</SelectItem>
-                  <SelectItem value="not interested">Not Interested</SelectItem>
+                  <SelectItem value="contacted">Contacted</SelectItem>
+                  <SelectItem value="replied">Replied</SelectItem>
+                  <SelectItem value="call_booked">Call Booked</SelectItem>
+                  <SelectItem value="call_done">Call Done</SelectItem>
+                  <SelectItem value="converted">Converted</SelectItem>
+                  <SelectItem value="dropped">Dropped</SelectItem>
                 </SelectContent>
               </Select>
             </div>

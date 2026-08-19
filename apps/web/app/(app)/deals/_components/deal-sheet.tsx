@@ -14,7 +14,7 @@ import { createDeal, updateDeal } from "@/lib/actions/deals";
 import { toast } from "@/components/ui/use-toast";
 import { Plus } from "lucide-react";
 
-type DealStage = "prospect" | "proposal" | "negotiation" | "won" | "lost";
+type DealStage = "discovery" | "site_assessment" | "quote_sent" | "negotiation" | "won" | "lost";
 
 interface Deal {
   id: string;
@@ -42,7 +42,7 @@ interface DealSheetProps {
   trigger?: React.ReactNode;
 }
 
-export function DealSheet({ deal, companies, contacts, defaultStage = "prospect", trigger }: DealSheetProps) {
+export function DealSheet({ deal, companies, contacts, defaultStage = "discovery", trigger }: DealSheetProps) {
   const [open, setOpen] = useState(false);
   const [stage, setStage] = useState<DealStage>(deal?.stage ?? defaultStage);
   const [companyId, setCompanyId] = useState(deal?.company_id ?? "");
@@ -62,12 +62,12 @@ export function DealSheet({ deal, companies, contacts, defaultStage = "prospect"
     if (contactId) formData.set("primary_contact_id", contactId);
 
     startTransition(async () => {
-      const result = isEdit
+      const result = !!deal
         ? await updateDeal(deal.id, formData)
         : await createDeal(formData);
 
       if (result.success) {
-        toast({ title: isEdit ? "Deal updated" : "Deal created", variant: "success" });
+        toast({ title: deal ? "Deal updated" : "Deal created", variant: "success" });
         setOpen(false);
       } else {
         toast({ title: "Error", description: result.error, variant: "destructive" });
@@ -87,9 +87,9 @@ export function DealSheet({ deal, companies, contacts, defaultStage = "prospect"
       </div>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>{isEdit ? "Edit Deal" : "New Deal"}</SheetTitle>
+          <SheetTitle>{deal ? "Edit Deal" : "New Deal"}</SheetTitle>
           <SheetDescription>
-            {isEdit ? "Update deal details." : "Create a new deal in your pipeline."}
+            {deal ? "Update deal details." : "Create a new deal in your pipeline."}
           </SheetDescription>
         </SheetHeader>
 
@@ -149,8 +149,9 @@ export function DealSheet({ deal, companies, contacts, defaultStage = "prospect"
               <Select value={stage} onValueChange={(v) => setStage(v as DealStage)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="prospect">Prospect</SelectItem>
-                  <SelectItem value="proposal">Proposal</SelectItem>
+                  <SelectItem value="discovery">Discovery</SelectItem>
+                  <SelectItem value="site_assessment">Site Assessment</SelectItem>
+                  <SelectItem value="quote_sent">Quote Sent</SelectItem>
                   <SelectItem value="negotiation">Negotiation</SelectItem>
                   <SelectItem value="won">Won</SelectItem>
                   <SelectItem value="lost">Lost</SelectItem>

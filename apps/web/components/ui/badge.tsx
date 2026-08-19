@@ -36,28 +36,24 @@ function Badge({ className, variant, ...props }: BadgeProps) {
 
 export { Badge, badgeVariants };
 
-export type LeadStatus = "new" | "initial count" | "deck sent" | "not interested" | "call scheduled" | "call done" | "proposal sent" | "closed";
-export type DealStage = "prospect" | "proposal" | "negotiation" | "won" | "lost";
+export type LeadStatus = "new" | "contacted" | "replied" | "call_booked" | "call_done" | "converted" | "dropped";
+export type DealStage = "discovery" | "site_assessment" | "quote_sent" | "negotiation" | "won" | "lost";
 
-const LEAD_STATUS_CONFIG: Record<LeadStatus, { label: string; variant: BadgeProps["variant"] }> = {
-  "new": { label: "New", variant: "default" },
-  "initial count": { label: "Initial Count", variant: "warning" },
-  "deck sent": { label: "Deck Sent", variant: "secondary" },
-  "not interested": { label: "Not Interested", variant: "destructive" },
-  "call scheduled": { label: "Call Scheduled", variant: "warning" },
-  "call done": { label: "Call Done", variant: "secondary" },
-  "proposal sent": { label: "Proposal Sent", variant: "secondary" },
-  "closed": { label: "Closed", variant: "success" },
+const LEAD_STATUS_CONFIG: Record<string, { label: string; variant: BadgeProps["variant"] }> = {
+  new: { label: "New", variant: "default" },
+  contacted: { label: "Contacted", variant: "info" },
+  replied: { label: "Replied", variant: "purple" },
+  call_booked: { label: "Call Booked", variant: "warning" },
+  call_done: { label: "Call Done", variant: "secondary" },
+  converted: { label: "Converted", variant: "success" },
+  dropped: { label: "Dropped", variant: "destructive" },
 };
 
 function titleCase(value: string) {
-  return value.replace(/\b\w/g, (c) => c.toUpperCase());
+  return value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-export function LeadStatusBadge({ status }: { status: LeadStatus }) {
-  // Fall back gracefully for any status not in the config (e.g. legacy values
-  // like "contacted"/"qualified"/"lost" left in the DB before the status
-  // migration was applied) instead of throwing and blanking the whole page.
+export function LeadStatusBadge({ status }: { status: LeadStatus | string }) {
   const { label, variant } = LEAD_STATUS_CONFIG[status] ?? {
     label: status ? titleCase(String(status)) : "Unknown",
     variant: "gray" as const,
@@ -65,10 +61,11 @@ export function LeadStatusBadge({ status }: { status: LeadStatus }) {
   return <Badge variant={variant}>{label}</Badge>;
 }
 
-export function DealStageBadge({ stage }: { stage: DealStage }) {
-  const map: Record<DealStage, { label: string; variant: VariantProps<typeof badgeVariants>["variant"] }> = {
-    prospect: { label: "Prospect", variant: "gray" },
-    proposal: { label: "Proposal", variant: "info" },
+export function DealStageBadge({ stage }: { stage: DealStage | string }) {
+  const map: Record<string, { label: string; variant: VariantProps<typeof badgeVariants>["variant"] }> = {
+    discovery: { label: "Discovery", variant: "purple" },
+    site_assessment: { label: "Site Assessment", variant: "info" },
+    quote_sent: { label: "Quote Sent", variant: "info" },
     negotiation: { label: "Negotiation", variant: "warning" },
     won: { label: "Won", variant: "success" },
     lost: { label: "Lost", variant: "destructive" },

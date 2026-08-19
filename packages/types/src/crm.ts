@@ -16,6 +16,10 @@ export const CompanySchema = z.object({
   name: z.string().min(1).max(255),
   domain: z.string().nullable(),
   industry: z.string().nullable(),
+  city: z.string().nullable(),
+  website: z.string().nullable(),
+  source: z.string().nullable(),
+  tags: z.array(z.string()).nullable(),
   logo_path: z.string().nullable(),
   owner_id: z.string().uuid(),
   deleted_at: z.string().datetime().nullable(),
@@ -29,8 +33,12 @@ export const CreateCompanySchema = CompanySchema.pick({
   name: true,
   domain: true,
   industry: true,
+  city: true,
+  website: true,
+  source: true,
+  tags: true,
   logo_path: true,
-}).partial({ domain: true, industry: true, logo_path: true });
+}).partial({ domain: true, industry: true, city: true, website: true, source: true, tags: true, logo_path: true });
 export type CreateCompany = z.infer<typeof CreateCompanySchema>;
 
 export const ContactSchema = z.object({
@@ -116,11 +124,16 @@ export const DealSchema = z.object({
   job_title: z.string().nullable(),
   company_id: z.string().uuid(),
   primary_contact_id: z.string().uuid().nullable(),
+  lead_id: z.string().uuid().nullable(),
   stage: DealStageSchema,
   amount: z.number().nonnegative(),
   product_use_case: z.string().nullable(),
   probability: z.number().int().min(0).max(100).nullable(),
   next_action: z.string().nullable(),
+  site_assessment_date: z.string().nullable(),
+  site_assessment_location: z.string().nullable(),
+  site_assessment_notes: z.string().nullable(),
+  lost_reason: z.string().nullable(),
   notes: z.string().nullable(),
   owner_id: z.string().uuid(),
   expected_close_date: z.string().date().nullable(),
@@ -135,16 +148,22 @@ export const CreateDealSchema = DealSchema.pick({
   job_title: true,
   company_id: true,
   primary_contact_id: true,
+  lead_id: true,
   stage: true,
   amount: true,
   product_use_case: true,
   probability: true,
   next_action: true,
+  site_assessment_date: true,
+  site_assessment_location: true,
+  site_assessment_notes: true,
+  lost_reason: true,
   notes: true,
   expected_close_date: true,
 }).partial({
-  job_title: true, primary_contact_id: true, product_use_case: true,
-  probability: true, next_action: true, notes: true, expected_close_date: true,
+  job_title: true, primary_contact_id: true, lead_id: true, product_use_case: true,
+  probability: true, next_action: true, site_assessment_date: true, site_assessment_location: true,
+  site_assessment_notes: true, lost_reason: true, notes: true, expected_close_date: true,
 });
 export type CreateDeal = z.infer<typeof CreateDealSchema>;
 

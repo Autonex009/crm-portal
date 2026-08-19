@@ -29,13 +29,12 @@ const LeadInput = z.object({
   source: z.string().max(100).nullable().optional(),
   status: z.enum([
     "new", 
-    "initial count", 
-    "deck sent", 
-    "not interested", 
-    "call scheduled", 
-    "call done", 
-    "proposal sent", 
-    "closed"
+    "contacted", 
+    "replied", 
+    "call_booked", 
+    "call_done", 
+    "converted", 
+    "dropped"
   ]).default("new"),
   value_estimate: z.coerce.number().nonnegative().nullable().optional(),
   next_follow_up_date: emptyToNull,
@@ -99,7 +98,7 @@ export async function updateLead(id: string, formData: FormData): Promise<Action
 
 export async function updateLeadStatus(
   id: string,
-  status: "new" | "initial count" | "deck sent" | "not interested" | "call scheduled" | "call done" | "proposal sent" | "closed"
+  status: "new" | "contacted" | "replied" | "call_booked" | "call_done" | "converted" | "dropped"
 ): Promise<ActionResult> {
   const supabase = await createClient();
   const user = await getAuthUser();
@@ -110,6 +109,69 @@ export async function updateLeadStatus(
 
   revalidatePath("/leads");
   return { success: true, data: undefined };
+}
+
+export async function convertLeadToDeal(
+  leadId: string,
+  dealData: { title?: string; amount?: number; expected_close_date?: string; notes?: string }
+): Promise<ActionResult<{ dealId: string }>> {
+  const supabase = await createClient();
+  const user = await getAuthUser();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  // 1. Fetch Lead
+  const { data: lead, error: fetchErr } = await supabase
+    .from("leads")
+    .select("*")
+    .eq("id", leadId)
+    .single();
+
+  if (fetchErr || !lead) return { success: false, error: "Lead not found" };
+  if (!lead.company_id) return { success: false, error: "Lead must be associated with a company before converting to a deal" };
+
+  // 2. Mark Lead as converted
+  const { error: leadUpdateErr } = await supabase
+    .from("leads")
+    .update({ status: "converted", updated_at: new Date().toISOString() })
+    .eq("id", leadId);
+
+  if (leadUpdateErr) return { success: false, error: leadUpdateErr.message };
+
+  // 3. Create Deal
+  const { data: deal, error: dealCreateErr } = await supabase
+    .from("deals")
+    .insert({
+      title: dealData.title || lead.title || `${lead.contact_name || "New"} Deal`,
+      job_title: lead.job_title || null,
+      company_id: lead.company_id,
+      primary_contact_id: lead.contact_id || null,
+      lead_id: leadId,
+      stage: "discovery",
+      amount: dealData.amount ?? lead.value_estimate ?? 1000000,
+      product_use_case: lead.product_interest || null,
+      probability: 20,
+      next_action: "Schedule initial discovery & site assessment review",
+      notes: dealData.notes || lead.notes || null,
+      owner_id: lead.assigned_to || user.id,
+      expected_close_date: dealData.expected_close_date || new Date(Date.now() + 86400000 * 30).toISOString().split("T")[0],
+    })
+    .select("id")
+    .single();
+
+  if (dealCreateErr || !deal) return { success: false, error: dealCreateErr?.message ?? "Failed to create deal" };
+
+  // 4. Log Activity
+  await supabase.from("activities").insert({
+    entity_type: "deal",
+    entity_id: deal.id,
+    type: "system",
+    author_id: user.id,
+    body: `Deal created via Lead conversion (${lead.title || lead.contact_name || leadId})`,
+  });
+
+  revalidatePath("/leads");
+  revalidatePath("/deals");
+  return { success: true, data: { dealId: deal.id } };
 }
 
 export async function deleteLead(id: string): Promise<ActionResult> {

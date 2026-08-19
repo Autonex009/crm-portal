@@ -300,10 +300,24 @@ export function QuotesDashboard() {
             </TableHeader>
             <TableBody>
               {pageItems.map((quote) => (
-                <TableRow key={quote.quoteNumber}>
+                <TableRow
+                  key={quote.quoteNumber}
+                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => router.push(`/quotes/${encodeURIComponent(quote.quoteNumber)}`)}
+                >
                   <TableCell>
-                    <p className="font-medium text-sm">{quote.opportunity.label}</p>
-                    <p className="text-xs text-muted-foreground">{quote.quoteNumber} · {quote.quoteName}</p>
+                    <Link
+                      href={`/quotes/${encodeURIComponent(quote.quoteNumber)}`}
+                      className="group block"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <p className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">
+                        {quote.opportunity.label}
+                      </p>
+                      <p className="text-xs text-muted-foreground group-hover:underline">
+                        {quote.quoteNumber} · {quote.quoteName}
+                      </p>
+                    </Link>
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">{PRODUCT_CATEGORY_LABEL[quote.productCategory]}</Badge>
@@ -315,27 +329,32 @@ export function QuotesDashboard() {
                   <TableCell>
                     <Badge variant={QUOTE_STATUS_TONE[quote.status]}>{quote.status}</Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-end gap-1">
                       <Link
                         href={`/quotes/new?edit=${encodeURIComponent(quote.quoteNumber)}`}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                         aria-label={`Edit ${quote.quoteNumber}`}
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <Pencil className="h-4 w-4" />
                       </Link>
                       <button
                         type="button"
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
                         aria-label={`Delete ${quote.quoteNumber}`}
-                        onClick={() => setDeleteTarget({ quoteNumber: quote.quoteNumber, quoteName: quote.quoteName })}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteTarget({ quoteNumber: quote.quoteNumber, quoteName: quote.quoteName });
+                        }}
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
                       <Link
-                        href={`/quotes/${quote.quoteNumber}`}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        href={`/quotes/${encodeURIComponent(quote.quoteNumber)}`}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                         aria-label={`View ${quote.quoteNumber}`}
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <ChevronRight className="h-4 w-4" />
                       </Link>

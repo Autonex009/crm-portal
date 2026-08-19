@@ -7,9 +7,10 @@ import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { Mail, Lock, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 
 const loginSchema = z.object({
-  email: z.string().email("Enter a valid email"),
+  email: z.string().email("Enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 type LoginValues = z.infer<typeof loginSchema>;
@@ -22,7 +23,7 @@ export function LoginForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -66,99 +67,86 @@ export function LoginForm() {
   }
 
   return (
-    <div className="space-y-4 rounded-lg border bg-card p-6 shadow-sm">
-      <button
-        type="button"
-        onClick={signInWithGoogle}
-        disabled={googleLoading || loading}
-        className="flex w-full items-center justify-center gap-2 rounded-md border bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent disabled:opacity-50"
-      >
-        <GoogleIcon className="h-4 w-4" />
-        {googleLoading ? "Redirecting…" : "Continue with Google"}
-      </button>
-
-      <div className="flex items-center gap-3">
-        <div className="h-px flex-1 bg-border" />
-        <span className="text-xs text-muted-foreground">or</span>
-        <div className="h-px flex-1 bg-border" />
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-1">
-          <label htmlFor="email" className="text-sm font-medium">
-            Email
-          </label>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {/* Email Input */}
+      <div className="space-y-1.5">
+        <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-foreground/80">
+          Email Address
+        </label>
+        <div className="relative">
+          <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <input
             id="email"
             type="email"
+            placeholder="name@company.com"
             autoComplete="email"
             className={cn(
-              "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring",
-              errors.email && "border-destructive"
+              "w-full rounded-xl border bg-background/80 pl-9 pr-3 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/50 focus:border-primary",
+              errors.email && "border-destructive focus:ring-destructive/50"
             )}
             {...register("email")}
           />
-          {errors.email && (
-            <p className="text-xs text-destructive">{errors.email.message}</p>
-          )}
         </div>
+        {errors.email && (
+          <p className="text-xs font-semibold text-destructive">{errors.email.message}</p>
+        )}
+      </div>
 
-        <div className="space-y-1">
-          <label htmlFor="password" className="text-sm font-medium">
+      {/* Password Input */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wider text-foreground/80">
             Password
           </label>
+        </div>
+        <div className="relative">
+          <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <input
             id="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
+            placeholder="••••••••"
             autoComplete="current-password"
             className={cn(
-              "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring",
-              errors.password && "border-destructive"
+              "w-full rounded-xl border bg-background/80 pl-9 pr-10 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/50 focus:border-primary",
+              errors.password && "border-destructive focus:ring-destructive/50"
             )}
             {...register("password")}
           />
-          {errors.password && (
-            <p className="text-xs text-destructive">{errors.password.message}</p>
-          )}
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
         </div>
-
-        {error && (
-          <p className="rounded-md bg-destructive/10 p-2 text-sm text-destructive">
-            {error}
-          </p>
+        {errors.password && (
+          <p className="text-xs font-semibold text-destructive">{errors.password.message}</p>
         )}
 
-        <button
-          type="submit"
-          disabled={loading || googleLoading}
-          className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
-        >
-          {loading ? "Signing in…" : "Sign in"}
-        </button>
-      </form>
-    </div>
-  );
-}
+      {/* Error Alert */}
+      {error && (
+        <div className="flex items-center gap-2 rounded-xl bg-destructive/10 border border-destructive/20 p-3 text-xs font-semibold text-destructive">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
 
-function GoogleIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        fill="#4285F4"
-        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1Z"
-      />
-      <path
-        fill="#34A853"
-        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.99.66-2.26 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23Z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84Z"
-      />
-      <path
-        fill="#EA4335"
-        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06L5.84 9.9C6.71 7.3 9.14 5.38 12 5.38Z"
-      />
-    </svg>
+      {/* Submit Button */}
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-md hover:bg-primary/90 hover:shadow-lg transition-all disabled:opacity-50"
+      >
+        {loading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Signing in…</span>
+          </>
+        ) : (
+          <span>Sign In to Dashboard</span>
+        )}
+      </button>
+    </form>
   );
 }
