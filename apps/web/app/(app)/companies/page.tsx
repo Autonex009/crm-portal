@@ -14,13 +14,13 @@ export default async function CompaniesPage() {
   const [{ data: companies }, { data: archivedCompanies }] = await Promise.all([
     supabase
       .from("companies")
-      .select("id, name, domain, industry, owner_id, created_at, deleted_at, archived_at")
+      .select("id, name, domain, website, city, industry, source, tags, owner_id, created_at, deleted_at, archived_at")
       .is("deleted_at", null)
       .is("archived_at", null)
       .order("name"),
     supabase
       .from("companies")
-      .select("id, name, domain, industry, owner_id, created_at, deleted_at, archived_at")
+      .select("id, name, domain, website, city, industry, source, tags, owner_id, created_at, deleted_at, archived_at")
       .is("deleted_at", null)
       .not("archived_at", "is", null)
       .order("name"),

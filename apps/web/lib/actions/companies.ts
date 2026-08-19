@@ -12,7 +12,11 @@ type ActionResult<T = void> =
 const CompanyInput = z.object({
   name: z.string().min(1, "Name is required").max(255),
   domain: z.string().max(255).nullable().optional(),
+  website: z.string().max(255).nullable().optional(),
+  city: z.string().max(100).nullable().optional(),
   industry: z.string().max(100).nullable().optional(),
+  source: z.string().max(100).nullable().optional(),
+  tags: z.array(z.string()).optional(),
 });
 
 export async function createCompany(formData: FormData): Promise<ActionResult<{ id: string }>> {
@@ -20,10 +24,17 @@ export async function createCompany(formData: FormData): Promise<ActionResult<{ 
   const user = await getAuthUser();
   if (!user) return { success: false, error: "Unauthorized" };
 
+  const rawTags = (formData.get("tags") as string) || "";
+  const tagsArray = rawTags ? rawTags.split(",").map((t) => t.trim()).filter(Boolean) : [];
+
   const parsed = CompanyInput.safeParse({
     name: formData.get("name"),
     domain: (formData.get("domain") as string) || null,
+    website: (formData.get("website") as string) || null,
+    city: (formData.get("city") as string) || null,
     industry: (formData.get("industry") as string) || null,
+    source: (formData.get("source") as string) || null,
+    tags: tagsArray,
   });
   if (!parsed.success) return { success: false, error: parsed.error.errors[0]?.message ?? "Invalid" };
 
@@ -43,10 +54,17 @@ export async function updateCompany(id: string, formData: FormData): Promise<Act
   const user = await getAuthUser();
   if (!user) return { success: false, error: "Unauthorized" };
 
+  const rawTags = (formData.get("tags") as string) || "";
+  const tagsArray = rawTags ? rawTags.split(",").map((t) => t.trim()).filter(Boolean) : [];
+
   const parsed = CompanyInput.safeParse({
     name: formData.get("name"),
     domain: (formData.get("domain") as string) || null,
+    website: (formData.get("website") as string) || null,
+    city: (formData.get("city") as string) || null,
     industry: (formData.get("industry") as string) || null,
+    source: (formData.get("source") as string) || null,
+    tags: tagsArray,
   });
   if (!parsed.success) return { success: false, error: parsed.error.errors[0]?.message ?? "Invalid" };
 

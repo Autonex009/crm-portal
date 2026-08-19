@@ -7,8 +7,13 @@ import { Providers } from "./providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "DealBridge",
+  title: "DealBridge — Autonex CRM",
   description: "Production-grade CRM with Slack, Google Calendar, and more.",
+  icons: {
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
 };
 
 export default function RootLayout({

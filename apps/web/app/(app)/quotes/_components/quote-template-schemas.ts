@@ -66,12 +66,34 @@ export interface QuoteCategoryTemplateValues {
   category: ProductCategory;
   reference: string;
   date: string;
+  taxRate?: number;
   headerFieldValues: Record<string, string | number>;
   scopeFieldValues: Record<string, string | number>;
   scopeDerivedLines: string[];
   customFields: CustomField[];
   costLines: CostLineDefinition[];
   footerSections: FooterSection[];
+}
+
+export interface PO5ColumnItem {
+  srNo: number;
+  description: string;
+  qty: number;
+  unitPrice: number;
+  amount: number;
+}
+
+export function mapCostLinesToPO5Column(computedLines: CostLineComputed[]): PO5ColumnItem[] {
+  return computedLines.map((line) => {
+    const serviceText = line.servicesIncluded.length > 0 ? ` (${line.servicesIncluded.join(", ")})` : "";
+    return {
+      srNo: line.srNo,
+      description: `${line.typeOfCost}${serviceText}`,
+      qty: line.qty,
+      unitPrice: line.finalPrice,
+      amount: line.total,
+    };
+  });
 }
 
 export function roundCurrency(value: number) {
@@ -126,6 +148,7 @@ export function createDefaultTemplateValues(category: ProductCategory): QuoteCat
     category,
     reference: "",
     date: new Date().toISOString().slice(0, 10),
+    taxRate: 18,
     headerFieldValues,
     scopeFieldValues,
     scopeDerivedLines: [...schema.scopeDerivedLines],

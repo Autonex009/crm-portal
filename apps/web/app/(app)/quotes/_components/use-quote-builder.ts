@@ -32,11 +32,12 @@ export function useQuoteBuilder(initialQuote: QuoteRecord = mockQuoteRecord) {
 
   const financialSummary = useMemo(() => {
     const subtotal = roundCurrency(costLines.reduce((sum, line) => sum + line.total, 0));
-    const taxAmount = roundCurrency(subtotal * TAX_RATE);
+    const effectiveTaxRate = (quote.categoryTemplate.taxRate ?? 18) / 100;
+    const taxAmount = roundCurrency(subtotal * effectiveTaxRate);
     const grandTotal = roundCurrency(subtotal + taxAmount);
 
-    return { subtotal, taxAmount, grandTotal };
-  }, [costLines]);
+    return { subtotal, taxAmount, grandTotal, taxRate: quote.categoryTemplate.taxRate ?? 18 };
+  }, [costLines, quote.categoryTemplate.taxRate]);
 
   function updateStatus(status: QuoteStatus) {
     setQuote((current) => ({ ...current, status }));

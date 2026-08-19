@@ -99,29 +99,49 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
 
           <h1 className="text-2xl font-bold">{company.name}</h1>
 
-          <div className="mt-3 flex flex-wrap gap-4 text-sm text-muted-foreground">
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+            {company.city && (
+              <Badge variant="outline" className="font-semibold text-foreground">
+                📍 {company.city}
+              </Badge>
+            )}
             {company.industry && (
               <div className="flex items-center gap-1.5">
                 <Briefcase className="h-4 w-4" />
                 <Badge variant="secondary">{company.industry}</Badge>
               </div>
             )}
-            {company.domain && (
+            {(company.website || company.domain) && (
               <a
-                href={`https://${company.domain}`}
+                href={(company.website || `https://${company.domain}`).startsWith("http") ? (company.website || `https://${company.domain}`) : `https://${company.website || company.domain}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 hover:text-foreground"
+                className="flex items-center gap-1.5 hover:text-foreground text-primary font-medium"
               >
                 <Globe className="h-4 w-4" />
-                {company.domain}
+                {company.domain || company.website}
               </a>
             )}
-            <div className="flex items-center gap-1.5">
+            {company.source && (
+              <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-md">
+                Source: {company.source}
+              </span>
+            )}
+            <div className="flex items-center gap-1.5 text-xs">
               <Building2 className="h-4 w-4" />
               Added {formatDate(company.created_at)}
             </div>
           </div>
+
+          {company.tags && company.tags.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {company.tags.map((t: string) => (
+                <Badge key={t} variant="secondary" className="text-xs font-normal">
+                  #{t}
+                </Badge>
+              ))}
+            </div>
+          )}
 
           <div className="mt-4 grid grid-cols-3 gap-4 pt-4 border-t">
             <div className="text-center">
