@@ -38,6 +38,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.4.0",
+    "framer-motion": "^13.1.0",
     "html2pdf.js": "^0.14.0",
     "lucide-react": "^0.513.0",
     "mermaid": "^11.16.0",
