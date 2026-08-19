@@ -15,6 +15,10 @@ const loginSchema = z.object({
 });
 type LoginValues = z.infer<typeof loginSchema>;
 
+// Company Google Workspace domain. `hd` narrows Google's account chooser to it
+// (a UX hint only — the real restriction is enforced server-side on signup).
+const ALLOWED_HD = "autonexai360.com";
+
 export function LoginForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +46,24 @@ export function LoginForm() {
     }
     router.push("/dashboard");
     router.refresh();
+  }
+
+  async function signInWithGoogle() {
+    setGoogleLoading(true);
+    setError(null);
+    const supabase = createClient();
+    const { error: authError } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: { hd: ALLOWED_HD, prompt: "select_account" },
+      },
+    });
+    // On success the browser is redirected to Google; only reachable on error.
+    if (authError) {
+      setError(authError.message);
+      setGoogleLoading(false);
+    }
   }
 
   return (
@@ -101,7 +123,6 @@ export function LoginForm() {
         {errors.password && (
           <p className="text-xs font-semibold text-destructive">{errors.password.message}</p>
         )}
-      </div>
 
       {/* Error Alert */}
       {error && (
